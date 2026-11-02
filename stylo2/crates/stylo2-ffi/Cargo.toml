@@ -1,0 +1,27 @@
+[package]
+name = "stylo2-ffi"
+description = "Minimal, stable C ABI over stylo2-core for the Kotlin/Java bridge, with optional JNI entry points."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+# `lib` keeps unit tests runnable; `cdylib`/`staticlib` are the Android/C link
+# outputs.
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[features]
+default = []
+# Adds `Java_..._native*` JNI entry points. Built only for Android targets with
+# the `jni` crate available; not part of the host build/test.
+jni = ["dep:jni"]
+
+[dependencies]
+stylo2-core = { path = "../stylo2-core", features = ["mock"] }
+stylo2-oplus = { path = "../stylo2-oplus" }
+stylo2-ble = { path = "../stylo2-ble" }
+stylo2-android = { path = "../stylo2-android" }
+jni = { version = "0.21.1", default-features = false, optional = true }

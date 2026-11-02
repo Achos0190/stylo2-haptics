@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/stylo2-core",
+    "crates/stylo2-ble",
+    "crates/stylo2-android",
+    "crates/stylo2-oplus",
+    "crates/stylo2-ffi",
+]
+
+# Shared metadata for every crate in the workspace.
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/Achos0190/stylo2-haptics"
+authors = ["stylo2-haptics contributors"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

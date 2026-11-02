@@ -1,0 +1,12 @@
+[package]
+name = "stylo2-oplus"
+description = "OnePlus accessory-service (IpeManager) binder adapter for stylo2. The privileged binder work runs JVM-side; this crate owns the profile mapping and the Rust-side backend."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+stylo2-core = { path = "../stylo2-core" }

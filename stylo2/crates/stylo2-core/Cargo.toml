@@ -1,0 +1,26 @@
+[package]
+name = "stylo2-core"
+description = "Portable, backend-agnostic haptic control model for the OnePlus Stylo 2 stylus."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+default = []
+# Exposes `stylo2_core::mock::MockBackend` to downstream crates and apps so they
+# can unit-test their integration without a device. Always available under
+# `cfg(test)` for this crate's own tests.
+mock = []
+
+[dependencies]
+# Intentionally empty: the portable core has no third-party dependencies and no
+# platform/transport code. Transports live in the backend crates.
+
+# End-to-end demo of the public API against the in-memory mock backend.
+# Run with: cargo run -p stylo2-core --example demo --features mock
+[[example]]
+name = "demo"
+required-features = ["mock"]
