@@ -38,7 +38,7 @@ The status labels below match the database (`research/data/`).
 
 ### Ground rules
 
-The skills `/pad3-readout` (Steps 1, 2 and 4), `/route-a-poc` (Step 3) and `/record-findings` (Step 6) carry out the steps below. Use them, or follow the steps directly.
+The skills `/pad3-readout` (Steps 1, 2, 2b and 4), `/route-a-poc` (Step 3) and `/record-findings` (Step 6) carry out the steps below. Use them, or follow the steps directly.
 
 Everything in `CLAUDE.md` applies. In short:
 
@@ -74,7 +74,7 @@ This reports the model, the project number, the build, the boot state, whether `
 python3 research/tools/pad3_readout.py all
 ```
 
-This runs `identify`, `firmware`, `modules`, `driver`, `service` and `bluetooth`. Everything lands in `research/local/pad3/`, which git ignores:
+This runs `identify`, `firmware`, `modules`, `driver`, `service`, `apk` and `bluetooth`. Everything lands in `research/local/pad3/`, which git ignores:
 
 | Step | What it settles |
 | --- | --- |
@@ -83,6 +83,7 @@ This runs `identify`, `firmware`, `modules`, `driver`, `service` and `bluetooth`
 | `modules` | (root only) installed modules and versions, which ones ship firmware, overlay mounts (jjhitel's `/dev/anyfs/upper/...`) |
 | `driver` | `oplus_wireless_pen.ko`: loaded?, path, `modinfo`, `vermagic`. It also pulls the module and pulls out firmware-path strings (does it contain `wireless_pen/%s/cps8601_firmware.bin`, and what fills `%s`?) |
 | `service` | `com.oplus.ipemanager` version, and whether `CoreService`, `PENCIL_SDK` and `safe.IOT` appear. Also **the protection level of `safe.IOT`**, read two ways, the permission allowlist files, and which pen-client packages (Notes, ...) hold the permission |
+| `apk` | **Pulls the installed `com.oplus.ipemanager` APK(s) from the tablet** (base and splits) into `research/local/pad3/raw/apk/<package>/<version>/`, and records the version, sizes and SHA-256. This version-matched copy is the input for Step 2b, so a mirror download is never used. `--packages a,b` pulls other packages, but only the pen service is cleared for Step 2b |
 | `bluetooth` | Pen bond present (addresses redacted), HCI snoop mode |
 
 Then:
@@ -95,6 +96,36 @@ python3 research/tools/fwinfo.py --strings <file>          # for any unknown bui
 The `--strings` output goes to the terminal, so keep it out of git. Read `research/local/pad3/summary.md`, which is redacted and safe to quote.
 
 **Reading the `safe.IOT` protection level.** If it includes `signature`, an ordinary app can never be granted it. Route A should then fail at bind, and the only open options are Route B and official authorisation. Note this before Step 3.
+
+### Step 2b: interface check on the tablet's APK (owner-approved)
+
+This checks that the interface the PoC and the upstream app call still matches the installed pen service: the descriptor, the 12 transaction codes, the 4 callbacks, and whether `getSupportFeatureList` has a code. The owner approved it on 2 Nov 2026, under the conditions in `CLAUDE.md`:
+
+- only the copy pulled in Step 2;
+- only the pen-SDK interface classes;
+- the APK and decompiled output stay in `research/local/`;
+- only names, codes and signatures are recorded.
+
+It needs [JADX](https://github.com/skylot/jadx) installed locally. Check its flags with `jadx --help`, since the options below differ between versions.
+
+1. **Decompile just the interface classes,** if your JADX has `--single-class` (1.5 and later):
+   ```bash
+   APK=research/local/pad3/raw/apk/com.oplus.ipemanager/<version>/<base>.apk
+   jadx --single-class com.oplus.ipemanager.sdk.ISdkAidlInterface --single-class-output research/local/pad3/jadx/ "$APK"
+   jadx --single-class com.oplus.ipemanager.sdk.ISDKAidlCallback  --single-class-output research/local/pad3/jadx/ "$APK"
+   ```
+2. **If that flag is missing, or the class isn't found** (it may be renamed in the vendor build), **ask the owner** before falling back to a full decompile into `research/local/`:
+   ```bash
+   jadx --no-res -d research/local/pad3/jadx-full "$APK"
+   ```
+   Even then, open and record only the classes the checker finds by their descriptor string.
+3. **Compare:**
+   ```bash
+   python3 research/tools/aidl_check.py research/local/pad3/jadx --apk-version <versionName>
+   ```
+   (Use `research/local/pad3/jadx-full` if you took step 2.) It prints, method by method, whether each one matches, is renumbered, has a different signature, or is missing or extra. If names are obfuscated, it lines methods up by transaction code. It writes `research/local/pad3/aidl-check.json`, which holds interface facts only and is safe to quote.
+
+Record the result in `gap-aidl-matches-firmware` and `if-oplus-sdk-interface` (with the APK version and SHA-256 from the `apk` step). **Don't change the app's codes or descriptor** until the owner has reviewed a difference. If the descriptor isn't found at all, that is a finding too. The PoC's bind log in Step 3 is an independent, read-only cross-check of the descriptor.
 
 ### Step 3: Route A, the PoC app (ask first: it installs an app)
 
@@ -156,6 +187,7 @@ Record the results in the database (`research/data/`). Set `updated` on every re
 - `gaps.json`: answer or narrow each open question with direct evidence only. Start with `gap-pen-firmware-directory` and the route gaps listed below.
 - `sources.json`: add `src-pad3-readout`, describing what was read and when, with no identifiers.
 - `research/reference/pad3-firmware/MANIFEST.md`: paths, sizes and hashes, in the style of the cxzlw manifest. No binaries.
+- The pen service APK's version, size and SHA-256, and the interface-check result: `if-oplus-ipemanager`, `if-oplus-sdk-interface`, `gap-aidl-matches-firmware`. Never commit the APK or the decompiled sources.
 - Fill in the Pad 3 row, the firmware table and the handshake section of `research/docs/pen-attach-handshake.md`.
 - Route results go in the `stylo2/docs/E-prototype.md` matrix (with method tags: inspection / static / adb / physical). Promote confirmed protocol facts in `stylo2/docs/C-protocol.md`, and code findings in `stylo2/crates/` (`Stylo2GattProfile`, `wire::reported_code`).
 
@@ -181,7 +213,7 @@ These are records in `research/data/gaps.json`. Each one's `details` ends with t
    - `gap-second-gatt-client-disruption`
    - `gap-captured-write-buzzes-pen`, last, and only once the disruption gap shows a second connection is safe.
 4. **Not device steps:**
-   - `gap-aidl-matches-firmware`: only the read-only partial checks. The full comparison needs decompiling, which is off unless the owner decides otherwise.
+   - `gap-aidl-matches-firmware`: answered by Step 2b, approved by the owner for the tablet's own APK only.
    - `gap-oneplus-sdk-access`: an enquiry to OnePlus by the owner.
 5. **Narrow along the way:** `gap-oneplus-feature-semantics`.
 

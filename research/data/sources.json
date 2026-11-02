@@ -271,7 +271,7 @@
         "Version the owner pointed to: Smart accessories 15.0.30. APKMirror's OnePlus uploads index lists it as uploaded 17 December 2024, 42.68 MB. The package name is not shown in that index, and the release page refused automated access (HTTP 403), so the package name was not checked.",
         "15.0.30 predates the Pad 3's OxygenOS 16 / Android 16 build, so the tablet probably runs a newer version. Compare with the versionName from the service step of research/tools/pad3_readout.py (or adb shell dumpsys package com.oplus.ipemanager).",
         "The copy on your own tablet is the one that matters. A mirror download's version and provenance may not match it.",
-        "Decompiling this APK, from the mirror or from the tablet, is off unless the owner decides otherwise (CLAUDE.md, gap-aidl-matches-firmware)."
+        "The mirror copy is not downloaded or decompiled. The owner-approved interface check uses the APK pulled from the tablet instead (PICKUP.md Step 2b, gap-aidl-matches-firmware)."
       ],
       "tags": [
         "apk",
@@ -698,7 +698,7 @@
       "summary": "The rules every session follows: no cracking, a read-only tablet, ask before changes, pen writes only from captured bytes, honest status labels.",
       "details": [
         "Path: CLAUDE.md at the repository root. Read in full on 2 Nov 2026.",
-        "No cracking: no bypassing signature, permission or app-authentication checks, and no extracting or reusing vendor signing keys, certificates or tokens. A route that needs any of that is recorded as a finding and stopped. No decompiling or patching OnePlus apps or firmware unless the owner explicitly decides otherwise; reading an APK's public signer fingerprint also needs the owner's go-ahead.",
+        "No cracking: no bypassing signature, permission or app-authentication checks, and no extracting or reusing vendor signing keys, certificates or tokens. A route that needs any of that is recorded as a finding and stopped. No patching OnePlus apps or firmware. One owner-approved decompiling exception (2 Nov 2026): JADX on the tablet's own copy of com.oplus.ipemanager, interface classes only, recording only names, codes and signatures via research/tools/aidl_check.py. Reading an APK's public signer fingerprint still needs the owner's go-ahead.",
         "The tablet is read-only. Allowed reads: getprop, ls, cat, dumpsys, pm path and pm list, logcat -d, dmesg, modinfo, sha256sum, find, adb pull. research/tools/pad3_readout.py enforces this.",
         "Ask the owner first before installing or uninstalling an app (including this repository's own apps), changing a setting (including the HCI snoop log), starting Shizuku, or writing to the pen.",
         "Root is never needed for what the project ships. If the tablet is rooted, su may be used for reads only.",
@@ -706,7 +706,7 @@
         "Never report an unauthorised or failed call as success. Works means the pen physically vibrated. Pen input and Notes must keep working; if probing disrupts them, stop and tell the owner.",
         "Data: pulled files go in research/local/ and are never committed; redact Bluetooth addresses, serial numbers, IMEIs and account names; set status honestly (verified only for what was read or observed on the device, with build and date in basis); set updated on every changed record.",
         "Code: do not change AIDL transaction codes, interface descriptors or profile integers without device evidence. app/ is upstream code and is left unchanged unless the owner asks.",
-        "Effect on this database: the ledger's JADX experiment for Q10 is off unless the owner decides otherwise (gap-aidl-matches-firmware), and the B0 comparison of signing certificates needs the owner's decision (c-trust-boundaries)."
+        "Effect on this database: the ledger's JADX experiment for Q10 is allowed in the narrowed form of PICKUP.md Step 2b (gap-aidl-matches-firmware), and the B0 comparison of signing certificates needs the owner's decision (c-trust-boundaries)."
       ],
       "tags": [
         "rules",

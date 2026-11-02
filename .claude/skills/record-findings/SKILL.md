@@ -20,6 +20,7 @@ The database is `research/data/*.json`, one file per record type. Its rules are 
 | Project number, model, build, root and fix-module state, firmware folders | `devices.json` → `dev-oneplus-pad3` |
 | Firmware builds, hashes, which folder holds which | `interfaces.json` → `if-cps8601-firmware`, plus `research/reference/pad3-firmware/MANIFEST.md` (paths, sizes, hashes; no binaries, same style as `research/reference/oplus-global-pen-enabler/MANIFEST.md`) |
 | Driver module info, firmware-path format | `interfaces.json` → `if-oplus-wireless-pen-driver` |
+| Pen service APK version, size, SHA-256; interface-check result (`research/local/pad3/aidl-check.json`) | `interfaces.json` → `if-oplus-ipemanager`, `if-oplus-sdk-interface`; `gaps.json` → `gap-aidl-matches-firmware`. Names, codes and signatures only, never decompiled code |
 | Pen service version, confirmed names, `safe.IOT` protection level | `interfaces.json` → `if-oplus-ipemanager` |
 | Answers to open questions | the matching `gap-*` in `gaps.json` (the order is in `PICKUP.md`) |
 | The read-out itself | `sources.json` → `src-pad3-readout` (what was read and when; no identifiers) |

@@ -16,10 +16,10 @@
         "Known from code: the repository files are marked as cleaned reconstructions.",
         "The route docs label every row of the interface reported until this is checked. The interface records in this database say verified because they match the repository's code, not a device.",
         "Also unknown: whether the real interface has intensity, duration or waveform parameters, whether getSupportFeatureList has a transaction, and what the other calls mean (gap-oneplus-feature-semantics).",
-        "Next step: JADX the installed com.oplus.ipemanager of this exact OxygenOS 16 build and compare it with the reconstruction.",
-        "Blocked: CLAUDE.md forbids decompiling OnePlus apps, and the older read-out brief said the same. A device session should not run that step. Record that the full comparison is not checkable without decompiling, and use only the read-only checks below.",
-        "Read-only partial checks: the PoC log prints the binder's interface descriptor at bind, and the service step of pad3_readout.py gives the installed version and whether CoreService and the PENCIL_SDK action appear (plan-pad3-readout). A different descriptor is a finding; do not change the code to match.",
-        "Record: installed version, the descriptor at bind, and any method or code that differs."
+        "Owner decision, 2 Nov 2026: decompiling is allowed for this one check, on the copy of com.oplus.ipemanager pulled from the owner's own tablet. Only the pen-SDK interface classes are examined, the APK and decompiled output stay in research/local/, and only the descriptor, method names, transaction codes and signatures are recorded (CLAUDE.md). No mirror download is used.",
+        "Next step: pull the APK with the apk step of research/tools/pad3_readout.py (it records the version and SHA-256), decompile only ISdkAidlInterface and ISDKAidlCallback with JADX, then run research/tools/aidl_check.py on the output (PICKUP.md Step 2b).",
+        "Read-only cross-check: the PoC log prints the binder's interface descriptor at bind. A different descriptor is a finding; do not change the code to match.",
+        "Record: APK version and SHA-256, the aidl_check.py result (match, renumbered, signature differs, missing or extra, per method), and the descriptor seen at bind. The owner reviews any difference before the app's codes change."
       ],
       "tags": [
         "aidl",

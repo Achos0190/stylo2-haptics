@@ -1,6 +1,6 @@
 ---
 name: pad3-readout
-description: Read-only read-out of the connected OnePlus Pad 3 for the Stylo 2 research. Covers the project number, pen-charger firmware retrieval and hashing, root modules, the wireless-pen driver, the pen service and its permission, the Bluetooth bond, and the pen attach handshake. Use when the owner asks to check, read out or inspect the tablet, to pull the cps8601 firmware, or to run PICKUP.md Steps 1, 2 or 4.
+description: Read-only read-out of the connected OnePlus Pad 3 for the Stylo 2 research. Covers the project number, pen-charger firmware retrieval and hashing, root modules, the wireless-pen driver, the pen service and its permission, pulling the pen service APK, the owner-approved interface check, the Bluetooth bond, and the pen attach handshake. Use when the owner asks to check, read out or inspect the tablet, to pull the cps8601 firmware or the pen service APK, to check the AIDL interface, or to run PICKUP.md Steps 1, 2, 2b or 4.
 ---
 
 # Pad 3 read-out
@@ -39,9 +39,20 @@ Point out to the owner:
 - any fix module or overlay;
 - the driver `vermagic` and any `wireless_pen/%s/...` path string;
 - **the `safe.IOT` protection level.** If it contains `signature`, an ordinary app can never hold it, so Route A should fail at bind;
-- which packages hold `safe.IOT`.
+- which packages hold `safe.IOT`;
+- the pulled `com.oplus.ipemanager` version and SHA-256 (`apk` step), next to the APKMirror 15.0.30 listing the owner pointed to (`src-apkmirror-smart-accessories`).
 
-## 3. Handshake (only when the owner is ready to handle the pen)
+## 3. Interface check (owner-approved; PICKUP.md Step 2b)
+
+Follow PICKUP.md Step 2b exactly:
+
+- JADX runs only on the APK pulled in step 2, and only on the `ISdkAidlInterface` and `ISDKAidlCallback` classes.
+- Ask the owner before any full decompile.
+- Run `python3 research/tools/aidl_check.py <jadx-output> --apk-version <versionName>` and report its table.
+- Never paste decompiled code into chat, commits or records; only names, codes and signatures.
+- Don't change the app's interface on a difference. Report it to the owner.
+
+## 4. Handshake (only when the owner is ready to handle the pen)
 
 ```bash
 python3 research/tools/pad3_readout.py handshake

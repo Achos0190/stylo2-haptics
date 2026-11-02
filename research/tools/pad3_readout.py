@@ -5,7 +5,9 @@ Collects, from the tablet connected over ADB, everything the local-session
 playbook (PICKUP.md) asks for: identity, the pen-charger firmware files
 (listed, hashed and pulled), installed root modules and overlays, the
 wireless-pen kernel driver, the pen service package and its permission, the
-Bluetooth bond, the attach handshake log, and the Route-A PoC app's log.
+pen service APK itself (pulled and hashed, for the owner-approved interface
+check), the Bluetooth bond, the attach handshake log, and the Route-A PoC
+app's log.
 
 Everything it runs on the tablet is a read. It refuses to run any device
 command that is not on its read-only allowlist. The single exception is a
@@ -24,6 +26,7 @@ Usage:
     python3 research/tools/pad3_readout.py check
     python3 research/tools/pad3_readout.py all            # every non-interactive step
     python3 research/tools/pad3_readout.py firmware       # one step
+    python3 research/tools/pad3_readout.py apk            # pull the pen service APK
     python3 research/tools/pad3_readout.py handshake      # guided pen attach/detach
     python3 research/tools/pad3_readout.py poc-log        # after running the PoC app
     python3 research/tools/pad3_readout.py summary        # rebuild summary.md
@@ -34,6 +37,8 @@ Options:
     --out DIR         output directory (default: research/local/pad3)
     --root MODE       auto | yes | no   (default: auto)
     --no-prompt       don't wait for Enter or ask questions (handshake, poc-log)
+    --packages LIST   apk step: comma-separated packages to pull
+                      (default: com.oplus.ipemanager)
 
 On Windows run it as `py -3 research/tools/pad3_readout.py ...`.
 Standard library only.
@@ -701,6 +706,50 @@ def step_service(run):
     return run.save("service", data)
 
 
+def step_apk(run):
+    """Pull the installed APK(s) of the pen service, record version, size and SHA-256."""
+    pkgs = run.packages or [PEN_SERVICE_PKG]
+    print(f"apk: pull {', '.join(pkgs)} from the tablet")
+    out = []
+    for pkg in pkgs:
+        c, path, _ = run.adb.shell(["pm", "path", pkg])
+        remote = [ln.split(":", 1)[1].strip() for ln in path.splitlines() if ln.startswith("package:")]
+        c, dump, _ = run.adb.shell(["dumpsys", "package", pkg])
+        version = (re.search(r"versionName=(\S+)", dump) or [None, ""])[1]
+        code = (re.search(r"versionCode=(\d+)", dump) or [None, ""])[1]
+        entry = {"package": pkg, "installed": bool(remote), "versionName": version,
+                 "versionCode": code, "files": []}
+        if not remote:
+            print(f"  {pkg}: not installed")
+            out.append(entry)
+            continue
+        safe_version = re.sub(r"[^\w.-]", "_", version or "unknown")
+        dest_dir = run.out / "raw" / "apk" / pkg / safe_version
+        for rpath in remote:
+            name = rpath.rsplit("/", 1)[-1]
+            local = dest_dir / name
+            if local.exists():
+                local.unlink()
+            pull = run.adb.pull(rpath, local, f"{pkg}-{name}")
+            f = {"device_path": rpath, "name": name, "pulled": bool(pull.get("pulled")),
+                 "via": pull.get("via") or pull.get("error") or pull.get("note")}
+            if pull.get("pulled"):
+                f["bytes"] = local.stat().st_size
+                f["sha256"] = sha256(local)
+                f["local"] = str(local.relative_to(REPO)) if local.is_relative_to(REPO) else str(local)
+            entry["files"].append(f)
+        out.append(entry)
+        print(f"  {pkg} {version} ({code}): {len(entry['files'])} file(s)")
+        for f in entry["files"]:
+            print(f"    {f['name']}: " + (f"{f['bytes']} bytes, sha256 {f['sha256'][:16]}..."
+                                          if f["pulled"] else f"not pulled ({f['via']})"))
+    note = ("APKs stay in research/local/ and are never committed. Commit only package, version, "
+            "sizes and hashes. Decompiling is limited to the owner-approved interface check "
+            "(PICKUP.md Step 2b, research/tools/aidl_check.py).")
+    print("  " + note)
+    return run.save("apk", {"packages": out, "note": note})
+
+
 def step_bluetooth(run):
     print("bluetooth: bond and connection state (addresses redacted)")
     c, out, _ = run.adb.shell(["dumpsys", "bluetooth_manager"], timeout=120)
@@ -797,7 +846,7 @@ def step_poc_log(run):
 def step_summary(run):
     print("summary: summary.md")
     S = {s: run.load(s) for s in ("check", "identify", "firmware", "modules", "driver",
-                                  "service", "bluetooth", "handshake", "poc-log")}
+                                  "service", "apk", "bluetooth", "handshake", "poc-log")}
     o = ["# Pad 3 read-out summary", "",
          f"Generated {now()} by `research/tools/pad3_readout.py`. Personal identifiers are redacted; "
          "raw output stays in `raw/` and must not be committed.", ""]
@@ -870,6 +919,16 @@ def step_summary(run):
               f"{' -> '.join(h['markers_seen_in_order']) or 'none'}.", ""]
         if h["firmware_load_lines"]:
             o += ["```"] + h["firmware_load_lines"][:20] + ["```", ""]
+    if S["apk"]:
+        o += ["## Pen service APK (pulled for the interface check)", "",
+              "| Package | Version | File | Bytes | SHA-256 |", "| --- | --- | --- | ---: | --- |"]
+        for e in S["apk"]["packages"]:
+            if not e["files"]:
+                o += [f"| `{e['package']}` | not installed | | | |"]
+            for f in e["files"]:
+                o += [f"| `{e['package']}` | {e['versionName']} ({e['versionCode']}) | `{f['name']}` "
+                      f"| {f.get('bytes', '')} | `{f.get('sha256', 'not pulled')}` |"]
+        o += ["", "APKs stay in `research/local/`; never commit them.", ""]
     if S["poc-log"]:
         q = S["poc-log"]
         o += ["## Route-A PoC", "", f"Installed {q['installed']} ({q['versionName']}); {q['line_count']} log lines; "
@@ -883,6 +942,7 @@ def step_summary(run):
           "- `research/data/interfaces.json` -> `if-cps8601-firmware`, `if-oplus-wireless-pen-driver`, `if-oplus-ipemanager`",
           "- `research/data/gaps.json` -> `gap-pen-firmware-directory` and the route gaps (see PICKUP.md)",
           "- `research/reference/pad3-firmware/MANIFEST.md` (paths, sizes, hashes; no binaries)",
+          "- `research/data/gaps.json` -> `gap-aidl-matches-firmware` (APK version and hash, then `research/tools/aidl_check.py`)",
           "- `stylo2/docs/E-prototype.md` matrix and `stylo2/docs/C-protocol.md` for route results", ""]
     p = run.out / "summary.md"
     p.write_text("\n".join(o), encoding="utf-8")
@@ -892,10 +952,11 @@ def step_summary(run):
 STEPS = {
     "check": step_check, "identify": step_identify, "firmware": step_firmware,
     "modules": step_modules, "driver": step_driver, "service": step_service,
-    "bluetooth": step_bluetooth, "handshake": step_handshake, "poc-log": step_poc_log,
+    "apk": step_apk, "bluetooth": step_bluetooth, "handshake": step_handshake,
+    "poc-log": step_poc_log,
     "summary": step_summary,
 }
-ALL = ["check", "identify", "firmware", "modules", "driver", "service", "bluetooth"]
+ALL = ["check", "identify", "firmware", "modules", "driver", "service", "apk", "bluetooth"]
 
 
 def main(argv=None):
@@ -907,8 +968,10 @@ def main(argv=None):
     ap.add_argument("--out", default=str(DEFAULT_OUT))
     ap.add_argument("--root", choices=("auto", "yes", "no"), default="auto")
     ap.add_argument("--no-prompt", action="store_true")
+    ap.add_argument("--packages", default="", help="apk step: comma-separated package names")
     a = ap.parse_args(argv)
     run = Run(Adb(a.adb, a.serial, a.root), a.out, prompt=not a.no_prompt)
+    run.packages = [p.strip() for p in a.packages.split(",") if p.strip()]
     if a.command not in ("summary", "check"):
         need_device(run.adb)
     for name in (ALL if a.command == "all" else [a.command]):

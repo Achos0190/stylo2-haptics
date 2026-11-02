@@ -74,6 +74,7 @@ CLAUDE.md                 Ground rules loaded automatically by Claude Code
 research/                 The database, its schema and tools, write-ups, reference material
   tools/pad3_readout.py   Read-only ADB read-out of the tablet (firmware, driver, service, logs)
   tools/fwinfo.py         Inspects pulled cps8601_firmware.bin files
+  tools/aidl_check.py     Compares the tablet's pen-service interface with the reconstruction
 stylo2/                   Rust workspace: backend-neutral haptics API, backends, FFI
   docs/                   Route analysis A–J, mission, trust boundaries, evidence ledger, legal
 android/

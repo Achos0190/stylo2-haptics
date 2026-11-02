@@ -490,7 +490,8 @@
         "getSupportFeatureList() returning List<String> is declared in the Java interface but has no transaction code.",
         "Scope of verified: this table matches the repository's reconstruction. The files are marked as cleaned, and the route notes call them a community reproduction. They have not been compared with the installed service on any device (gap-aidl-matches-firmware). The route notes label the descriptor, the 12 codes and the callbacks reported for that reason.",
         "The reconstruction has no parameter for intensity, duration, frequency, waveform or custom patterns. Whether the real interface has any is unknown.",
-        "The Rust library uses only setVibrationType, startFeedBackVibration, stopFeedBackVibration and the two callback calls (stylo2/docs/C-protocol.md section 1.2)."
+        "The Rust library uses only setVibrationType, startFeedBackVibration, stopFeedBackVibration and the two callback calls (stylo2/docs/C-protocol.md section 1.2).",
+        "Check against the installed service: PICKUP.md Step 2b compares the tablet's own com.oplus.ipemanager with this reconstruction (research/tools/aidl_check.py; gap-aidl-matches-firmware)."
       ],
       "tags": [
         "aidl",

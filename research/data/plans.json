@@ -217,7 +217,7 @@
       "summary": "Read the tablet without changing it, with research/tools/pad3_readout.py or the equivalent adb reads, before any experiment.",
       "details": [
         "Playbook: PICKUP.md Steps 1, 2 and 4. Raw commands: stylo2/docs/G-local-continuation.md section 3 and the appendix of PICKUP.md. Rules: CLAUDE.md.",
-        "Tool steps: check (model, project number, build, boot state, whether su works, which relevant apps are installed), identify, firmware (lists, hashes and pulls the pen-charger firmware, runs fwinfo.py), modules (root only), driver (module info and firmware-path strings), service, bluetooth, handshake (guided), poc-log, all.",
+        "Tool steps: check (model, project number, build, boot state, whether su works, which relevant apps are installed), identify, firmware (lists, hashes and pulls the pen-charger firmware, runs fwinfo.py), modules (root only), driver (module info and firmware-path strings), service, apk (pulls the installed pen service APK and records version, sizes and SHA-256; --packages for others), bluetooth, handshake (guided), poc-log, all.",
         "Output goes to research/local/pad3/, which git ignores. summary.md there is redacted and safe to quote. raw/ is not.",
         "The tool refuses any device command that is not on its read-only allowlist. The one exception is a temporary copy under /sdcard/Download/ to pull a file the shell user cannot read, deleted straight away.",
         "service step: the pen service version; whether CoreService, the PENCIL_SDK action and safe.IOT appear; the protection level of safe.IOT read two ways (pm list permissions and dumpsys package of the declaring package); the permission allowlist XML files; which pen-client packages hold the permission.",
@@ -225,7 +225,7 @@
         "If the protection level is signature, G says even a privileged install needs OnePlus's platform key, which closes the binder route to an independent app and leaves BLE or official authorisation.",
         "Identify the tablet first. PICKUP.md says it is not established whether it is rooted or has a pen-fix module, and MISSION.md and stylo2/README.md describe it as stock and non-rooted. Root, if present, is for reads only.",
         "G section 8 first-30-minutes order: adb and wireless debugging working so the tablet is free to hold; this read-out; install the inspector and confirm the pen is detectable (ask first); one HCI capture of a single pencil stroke with start and stop (ask first).",
-        "Answers: gap-iot-permission-level, gap-pen-firmware-directory, and the version part of gap-aidl-matches-firmware. Also feeds if-oplus-ipemanager, dev-oneplus-pad3, if-cps8601-firmware and if-oplus-wireless-pen-driver.",
+        "Answers: gap-iot-permission-level, gap-pen-firmware-directory, and, with the apk step and research/tools/aidl_check.py (PICKUP.md Step 2b, owner-approved), gap-aidl-matches-firmware. Also feeds if-oplus-ipemanager, dev-oneplus-pad3, if-cps8601-firmware and if-oplus-wireless-pen-driver.",
         "Results: none yet. Not run on a device."
       ],
       "tags": [

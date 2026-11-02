@@ -20,7 +20,8 @@ research/
 │   ├── validate.py          Checks every record and cross-reference
 │   ├── build.py             Combined file and per-record documents, in build/
 │   ├── fwinfo.py            Inspects cps8601_firmware.bin files (hash, known build, 8051 vectors, strings)
-│   └── pad3_readout.py      Read-only ADB read-out of a tablet into local/pad3/ (see ../PICKUP.md)
+│   ├── pad3_readout.py      Read-only ADB read-out of a tablet into local/pad3/, incl. the pen service APK (see ../PICKUP.md)
+│   └── aidl_check.py        Compares decompiled interface classes with the reconstruction (owner-approved, PICKUP Step 2b)
 ├── site/
 │   └── stylus-haptics-db.html    Source of the searchable database page (runs on claude.ai)
 ├── docs/
