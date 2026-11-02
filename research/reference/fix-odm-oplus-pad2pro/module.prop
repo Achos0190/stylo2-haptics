@@ -1,7 +1,0 @@
-id=fix-odm-oplus-pad2pro
-name=Stylus Fixes for OnePlus
-version=v1.2
-versionCode=102
-author=jjhitel
-description=Fix stylus issues on OnePlus devices after installing a different regional ROM.
-updateJson=https://raw.githubusercontent.com/jjhitel/fix-odm-oplus-pad2pro/main/update.json

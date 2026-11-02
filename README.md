@@ -46,3 +46,11 @@ Open the project in Android Studio and build the `app` module, or run:
 ```
 
 Kotlin, minimum SDK 30, target SDK 36.
+
+## Research
+
+The research behind this project now lives in [Achos0190/Stylo-db](https://github.com/Achos0190/Stylo-db), under `research/`. It covers:
+- a structured database of sources, devices, interfaces and open questions on stylus haptics on Android;
+- the pen attach-handshake and firmware analysis;
+- reference copies of the community regional-ROM stylus fixes;
+- a pickup prompt for reading firmware off the tablet.
