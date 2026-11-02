@@ -1,0 +1,12 @@
+[package]
+name = "stylo2-android"
+description = "Android glue for stylo2: permission/service constants, backend-selection policy, and the clearly-labelled tablet-vibrator fallback."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+stylo2-core = { path = "../stylo2-core" }

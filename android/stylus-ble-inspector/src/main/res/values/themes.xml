@@ -1,0 +1,7 @@
+<resources>
+    <!-- Plain platform theme; Compose Material3 supplies the actual visuals. -->
+    <style name="Theme.Stylo2Inspector" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

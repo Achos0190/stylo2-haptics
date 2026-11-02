@@ -1,0 +1,3 @@
+/build
+# Native libraries produced by `cargo ndk` (see README); build output, not source.
+/src/main/jniLibs/

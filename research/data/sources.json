@@ -1,0 +1,1481 @@
+{
+  "type": "source",
+  "records": [
+    {
+      "id": "repo-stylo2-haptics",
+      "type": "source",
+      "title": "Stylo2 Haptics repository (this project)",
+      "vendor": "OnePlus",
+      "category": "Source code",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://github.com/Achos0190/stylo2-haptics",
+      "links": [
+        {
+          "label": "Upstream project named in the README",
+          "url": "https://github.com/YeetingWaterbottle/stylo2-haptics"
+        }
+      ],
+      "summary": "The Magisk module and companion app behind the XDA thread. It contains the only working third-party client for the Stylo 2 haptics service found so far.",
+      "details": [
+        "app/src/main/java/com/oplus/ipemanager/sdk/ holds the reconstructed service interface: ISdkAidlInterface, ISDKAidlCallback, Vibration and IpeFeature. The files are marked as cleaned reconstructions.",
+        "OplusPencilSdkClient.kt defines StylusVibrationClient: permission check, bindService, interface-descriptor check, and a StateFlow<Connection> for the UI.",
+        "The README says the vibration presets were taken from analysis of the stock OnePlus Notes app.",
+        "Build: Kotlin, minSdk 30, targetSdk 36, compileSdk 36, AGP 8.13.0, Kotlin 2.0.21.",
+        "Known defect: unbind() calls stopVibration() after unbindService(), so the stop command can go to a binder that is already released. Stop first, then unbind.",
+        "Known defect: getSupportFeatureList() is declared but has no transaction code and always throws.",
+        "The non-root interoperability track sits alongside this app: see repo-stylo2-interop-track. It does not use the Magisk module or the priv-app install."
+      ],
+      "tags": [
+        "kotlin",
+        "aidl",
+        "binder",
+        "magisk"
+      ],
+      "related": [
+        "src-xda-stylo2",
+        "if-oplus-ipemanager",
+        "if-oplus-sdk-interface",
+        "if-oplus-call-sequence",
+        "repo-stylo2-interop-track"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Extended on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "repo-stylo2-interop-track",
+      "type": "source",
+      "title": "Non-root interoperability track: stylo2 Rust workspace and Android test apps",
+      "vendor": "OnePlus",
+      "category": "Source code",
+      "status": "verified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "The Rust library and the three Android modules that the route docs are written around. They are host-tested only; nothing has run on a device.",
+      "details": [
+        "stylo2/ is a Rust workspace with five crates: stylo2-core (API, states, profiles, errors, backend trait, command policy), stylo2-oplus (binder adapter and the profile-to-integer mapping), stylo2-ble (direct-BLE scaffold, inert until a verified profile is supplied, plus a ranker for discovered characteristics), stylo2-android (backend choice and tablet-vibrator fallback), stylo2-ffi (C ABI and optional JNI entry points).",
+        "android/ holds stylo2-bridge (Kotlin layer), stylo2-poc (Route A PoC) and stylus-ble-inspector (BLE inspector). They are modules of one Gradle build at the repository root, next to the upstream app in app/.",
+        "Android build status, as the docs now state it: the ledger, the root README and the PoC and inspector READMEs say the modules compile (assembleDebug, from the repository root) and the inspector's JVM unit tests pass, from a Gradle run on 2 Nov 2026. All say not device-tested. This record did not re-run Gradle. An earlier version of the ledger said the modules were not built.",
+        "Host check on 2 Nov 2026: cargo test --workspace ran 26 tests and all passed (core 15, ble 4, ffi 3, android 2, oplus 2).",
+        "Same day: cargo clippy --workspace --all-targets with warnings denied finished clean. The jni feature check could not run offline here, so that claim is unchecked.",
+        "Doc inconsistency: stylo2/README.md and docs D, E and F say 22 tests. PICKUP.md and G say 26. The code and the run say 26.",
+        "Where device results go in code: stylo2_ble::Stylo2GattProfile (service UUID, control characteristic UUID, byte encoder; deliberately no default value), stylo2_ble::recon::candidate_control_characteristics (ranks discovered characteristics), the BinderTransport and GattTransport traits, stylo2_oplus::wire::reported_code, and Availability.ble_protocol_verified in stylo2-android.",
+        "wire::reported_code returns Pencil 0, Eraser 1, Ballpoint 2, Pen 3. Its doc comment says these are inferred from declaration order. A separate constant gives 4 for FUNCTION_VIBRATION and calls it a feedback mode, which is unconfirmed (gap-oneplus-feature-semantics).",
+        "ConnectionState has five states today: Disconnected, Connecting, Connected, PermissionDenied, ServiceUnavailable.",
+        "stylo2_android::preferred_backend picks the authorised binder first, then verified direct BLE, then the tablet vibrator, which is labelled as not the pen.",
+        "Boundaries stated in the docs: no root, no priv-app install, no firmware change. The PoC calls the system service only. The inspector is an ordinary BLE client. Licence: stylo2/README.md says the workspace is dual-licensed Apache-2.0 or MIT, and the root README says the repository has no licence of its own yet. The inspector bundles two MIT-licensed BlueShark files (see its NOTICE).",
+        "Read-only tablet tooling lives in research/tools/pad3_readout.py (plan-pad3-readout)."
+      ],
+      "tags": [
+        "rust",
+        "kotlin",
+        "workspace",
+        "poc",
+        "inspector"
+      ],
+      "related": [
+        "repo-stylo2-haptics",
+        "plan-route-a-poc-run",
+        "plan-ble-independent-access-test",
+        "plan-architecture",
+        "plan-device-test-matrix",
+        "if-oplus-sdk-interface",
+        "src-stylo2-mission",
+        "plan-pad3-readout",
+        "src-stylo2-e-prototype",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-pickup",
+        "src-project-readme",
+        "plan-route-feasibility",
+        "gap-profile-integer-feel"
+      ],
+      "basis": "stylo2/ and android/ read, and cargo test and cargo clippy run on the host, on 2 Nov 2026. Android modules not rebuilt here. Nothing run on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-android-api-reference",
+      "type": "source",
+      "title": "Android API reference: InputDevice, VibrationEffect, Composition",
+      "vendor": "Android",
+      "category": "Platform documentation",
+      "status": "verified",
+      "priority": "high",
+      "url": "https://developer.android.com/reference/android/view/InputDevice",
+      "links": [
+        {
+          "label": "InputDevice",
+          "url": "https://developer.android.com/reference/android/view/InputDevice"
+        },
+        {
+          "label": "VibrationEffect",
+          "url": "https://developer.android.com/reference/android/os/VibrationEffect"
+        },
+        {
+          "label": "VibrationEffect.Composition",
+          "url": "https://developer.android.com/reference/android/os/VibrationEffect.Composition"
+        },
+        {
+          "label": "MotionEvent",
+          "url": "https://developer.android.com/reference/android/view/MotionEvent"
+        }
+      ],
+      "summary": "Reference pages used to check API levels and constant values in this database.",
+      "details": [],
+      "tags": [
+        "api-levels"
+      ],
+      "related": [
+        "if-android-inputdevice",
+        "if-android-vibrator"
+      ],
+      "basis": "Read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-android-ble-libraries",
+      "type": "source",
+      "title": "Android Bluetooth LE development libraries",
+      "vendor": "Bluetooth",
+      "category": "Tooling",
+      "status": "unverified",
+      "priority": "low",
+      "url": "https://github.com/NordicSemiconductor/Android-BLE-Library",
+      "links": [
+        {
+          "label": "Nordic Android BLE Library",
+          "url": "https://github.com/NordicSemiconductor/Android-BLE-Library"
+        },
+        {
+          "label": "Android connectivity samples",
+          "url": "https://github.com/android/connectivity-samples"
+        }
+      ],
+      "summary": "General-purpose libraries and samples for Bluetooth LE on Android.",
+      "details": [
+        "Useful for accessories you control. A pen whose link is owned by a system service is normally not reachable this way from an ordinary app."
+      ],
+      "tags": [
+        "ble",
+        "android"
+      ],
+      "related": [
+        "c-vendor-service-pattern"
+      ],
+      "basis": "Research inventory.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-android-stylus-guide",
+      "type": "source",
+      "title": "Android developer guide: stylus input and advanced stylus features",
+      "vendor": "Android",
+      "category": "Platform documentation",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://developer.android.com/develop/ui/views/touch-and-input/stylus-input",
+      "links": [
+        {
+          "label": "Stylus input overview",
+          "url": "https://developer.android.com/develop/ui/views/touch-and-input/stylus-input"
+        },
+        {
+          "label": "Advanced stylus features",
+          "url": "https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/advanced-stylus-features"
+        }
+      ],
+      "summary": "Google's app-side guide to pressure, tilt, orientation, hover, palm rejection, low-latency rendering, motion prediction and ink recognition.",
+      "details": [
+        "The stylus pages do not cover haptics. Tactile feedback appears only as a separate topic in the site navigation."
+      ],
+      "tags": [
+        "motionevent",
+        "latency",
+        "ink"
+      ],
+      "related": [
+        "if-android-motionevent",
+        "if-android-low-latency"
+      ],
+      "basis": "Both pages read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-aosp-input",
+      "type": "source",
+      "title": "AOSP: input architecture",
+      "vendor": "Android",
+      "category": "Platform documentation",
+      "status": "verified",
+      "priority": "high",
+      "url": "https://source.android.com/docs/core/interaction/input",
+      "links": [],
+      "summary": "How Android turns kernel input events into events delivered to app windows.",
+      "details": [],
+      "tags": [
+        "eventhub",
+        "inputreader",
+        "inputdispatcher"
+      ],
+      "related": [
+        "c-android-input-path"
+      ],
+      "basis": "Read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-aosp-stylus",
+      "type": "source",
+      "title": "AOSP: Bluetooth stylus specification",
+      "vendor": "Android",
+      "category": "Platform documentation",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://source.android.com/docs/core/interaction/accessories/stylus",
+      "links": [],
+      "summary": "Android's device-maker spec for Bluetooth styluses. It defines the HID data the pen reports and says the platform merges it with touchscreen input.",
+      "details": [
+        "Covers Bluetooth, Bluetooth LE and USB styluses. OEMs must support Bluetooth and should support Bluetooth LE.",
+        "Contains no section on haptics or vibration."
+      ],
+      "tags": [
+        "hid",
+        "bluetooth",
+        "oem"
+      ],
+      "related": [
+        "if-android-stylus-hid",
+        "c-android-input-path"
+      ],
+      "basis": "Read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-apkmirror-smart-accessories",
+      "type": "source",
+      "title": "OnePlus Smart Accessories app listing (APKMirror)",
+      "vendor": "OnePlus",
+      "category": "Package distribution",
+      "status": "unverified",
+      "priority": "high",
+      "url": "https://www.apkmirror.com/apk/oneplus-ltd/smart-accessories-2/",
+      "links": [
+        {
+          "label": "Smart Accessories 15.0.30 (APKMirror)",
+          "url": "https://www.apkmirror.com/apk/oneplus-ltd/smart-accessories-2/smart-accessories-2-15-0-30-release/smart-accessories-15-0-30-android-apk-download/"
+        }
+      ],
+      "summary": "Third-party mirror listing for OnePlus Smart Accessories, named in the research as the package that hosts the pen service.",
+      "details": [
+        "Not confirmed to be the same package or version as com.oplus.ipemanager on the Pad 3.",
+        "Version the owner pointed to: Smart accessories 15.0.30. APKMirror's OnePlus uploads index lists it as uploaded 17 December 2024, 42.68 MB. The package name is not shown in that index, and the release page refused automated access (HTTP 403), so the package name was not checked.",
+        "15.0.30 predates the Pad 3's OxygenOS 16 / Android 16 build, so the tablet probably runs a newer version. Compare with the versionName from the service step of research/tools/pad3_readout.py (or adb shell dumpsys package com.oplus.ipemanager).",
+        "The copy on your own tablet is the one that matters. A mirror download's version and provenance may not match it.",
+        "The mirror copy is not downloaded or decompiled. The owner-approved interface check uses the APK pulled from the tablet instead (PICKUP.md Step 2b, gap-aidl-matches-firmware)."
+      ],
+      "tags": [
+        "apk",
+        "ipemanager"
+      ],
+      "related": [
+        "c-observing-on-device",
+        "gap-aidl-matches-firmware",
+        "if-oplus-ipemanager"
+      ],
+      "basis": "Link from the research inventory. Version 15.0.30, upload date and size read from APKMirror's OnePlus Ltd. uploads index via web search on 2 Nov 2026; the release page itself was not readable (HTTP 403).",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-apple-canvas-feedback",
+      "type": "source",
+      "title": "Apple: UICanvasFeedbackGenerator and Pencil haptics",
+      "vendor": "Apple",
+      "category": "Platform documentation",
+      "status": "verified",
+      "priority": "medium",
+      "url": "https://developer.apple.com/documentation/uikit/uicanvasfeedbackgenerator",
+      "links": [
+        {
+          "label": "UICanvasFeedbackGenerator",
+          "url": "https://developer.apple.com/documentation/uikit/uicanvasfeedbackgenerator"
+        },
+        {
+          "label": "Playing haptic feedback in your app",
+          "url": "https://developer.apple.com/documentation/applepencil/playing-haptic-feedback-in-your-app"
+        }
+      ],
+      "summary": "Apple's semantic haptics API for drawing canvases, which plays on Apple Pencil Pro.",
+      "details": [],
+      "tags": [
+        "ipados",
+        "reference-api"
+      ],
+      "related": [
+        "if-apple-canvas-feedback",
+        "dev-apple-pencil-pro"
+      ],
+      "basis": "Apple documentation via search results, 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-bluetooth-analysis-tools",
+      "type": "source",
+      "title": "Bluetooth capture and analysis tools",
+      "vendor": "Bluetooth",
+      "category": "Tooling",
+      "status": "unverified",
+      "priority": "high",
+      "url": "https://www.wireshark.org/",
+      "links": [
+        {
+          "label": "Wireshark: reads HCI, ATT, GATT and SMP traffic",
+          "url": "https://www.wireshark.org/"
+        },
+        {
+          "label": "Nordic nRF Sniffer for Bluetooth LE: over-the-air capture",
+          "url": "https://github.com/NordicSemiconductor/nRF-Sniffer-for-Bluetooth-LE"
+        },
+        {
+          "label": "BlueZ: Linux Bluetooth stack, includes btmon",
+          "url": "https://github.com/bluez/bluez"
+        },
+        {
+          "label": "BlueShark: HCI snoop capture with Shizuku, no root",
+          "url": "https://github.com/nphil/BlueShark"
+        }
+      ],
+      "summary": "Tools for seeing what an already-paired pen and the tablet exchange over Bluetooth.",
+      "details": [
+        "Because the Stylo 2 is already connected, Android's own HCI snoop log is the first choice. An external sniffer is a fallback if the log is not detailed enough.",
+        "BlueShark (MIT, nphil) with Shizuku captures the HCI snoop on a stock tablet without root, with named markers and a decode down to ATT (per stylo2/docs/G-local-continuation.md). Shizuku is started over ADB and is not root. Not tried here. Both are extra apps, so ask the owner first.",
+        "The BLE inspector in android/stylus-ble-inspector reuses two BlueShark files (see its NOTICE) but is not a sniffer. A second GATT client cannot see Notes' traffic.",
+        "J: an external sniffer only adds value if the HCI snoop misses packets, and over-the-air capture of an encrypted link shows ciphertext unless pairing was captured."
+      ],
+      "tags": [
+        "hci",
+        "gatt",
+        "capture"
+      ],
+      "related": [
+        "c-observing-on-device",
+        "gap-oneplus-transport",
+        "plan-hci-snoop-capture",
+        "plan-ble-independent-access-test",
+        "src-stylo2-g-local-continuation",
+        "src-stylo2-j-capture-plan",
+        "gap-haptic-over-gatt"
+      ],
+      "basis": "Research inventory. Extended on 2 Nov 2026 from stylo2/docs/G-local-continuation.md and J-capture-plan.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-crdroid-caihong",
+      "type": "source",
+      "title": "crDroid device tree for caihong: proprietary file list",
+      "vendor": "OnePlus",
+      "category": "Device tree",
+      "status": "verified",
+      "priority": "medium",
+      "url": "https://github.com/crdroidandroid/android_device_oneplus_caihong/blob/16.0/proprietary-files.txt",
+      "links": [],
+      "summary": "Custom-ROM file list showing how the Pad Pro's pen firmware is laid out: two real directories, each with a second name linked to it.",
+      "details": [
+        "odm/firmware/wireless_pen/23976/cps8601_firmware.bin;SYMLINK=odm/firmware/wireless_pen/23926/cps8601_firmware.bin",
+        "odm/firmware/wireless_pen/23978/cps8601_firmware.bin;SYMLINK=odm/firmware/wireless_pen/23927/cps8601_firmware.bin",
+        "So a custom ROM covers both directory names with one file each, which is what the community module does by copying."
+      ],
+      "tags": [
+        "device-tree",
+        "firmware"
+      ],
+      "related": [
+        "if-cps8601-firmware",
+        "src-cxzlw-pen-enabler"
+      ],
+      "basis": "File read on 2 Nov 2026 (branch 16.0).",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-cxzlw-pen-enabler",
+      "type": "source",
+      "title": "oplus-global-pen-enabler (stylus firmware fix module)",
+      "vendor": "OnePlus",
+      "category": "Community implementation",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://github.com/cxzlw/oplus-global-pen-enabler",
+      "links": [],
+      "summary": "KernelSU module that restores the Stylo pen after converting a Chinese OnePlus Pad Pro to a global ROM, by adding the missing CPS8601 pen-charger firmware directories.",
+      "details": [
+        "Targets the OnePlus Pad Pro (caihong) and Pad 2 (rainbow) with the Stylo 2 (Chinese name: OnePlus Smart Stylus Pro).",
+        "Ships odm/firmware/wireless_pen/{23926,23927,23976,23978,24926}/cps8601_firmware.bin plus module.prop, with no install or boot scripts. Hashes: research/reference/oplus-global-pen-enabler/MANIFEST.md.",
+        "The four 239xx files are identical. 24926 is a different build, added on 12 Apr 2026 by contributor FRTI64.",
+        "The README explains the method: kernel module info for oplus_wireless_pen.ko, the cps8601 kernel log on attach, and the finding that ROM regions use different firmware directory names.",
+        "Swapping the Chinese ROM's odm.img confirmed the cause before the module was written.",
+        "Full write-up: research/docs/pen-attach-handshake.md"
+      ],
+      "tags": [
+        "kernelsu",
+        "firmware",
+        "regional-rom",
+        "cps8601"
+      ],
+      "related": [
+        "if-oplus-wireless-pen-driver",
+        "if-cps8601-firmware",
+        "c-pen-attach-handshake",
+        "src-xda-regional-stylus-fix",
+        "src-jjhitel-fix-odm"
+      ],
+      "basis": "Repository read at commit 1869c22 on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-focuspen",
+      "type": "source",
+      "title": "FocusPen (HyperOS stylus settings module)",
+      "vendor": "Xiaomi",
+      "category": "System modification",
+      "status": "verified",
+      "priority": "medium",
+      "url": "https://github.com/WondersReady/FocusPen",
+      "links": [],
+      "summary": "LSPosed module that adds button actions, quick-action rings and per-app configuration to HyperOS stylus settings.",
+      "details": [
+        "Main test device is the Xiaomi Pad 8 Pro on HyperOS 3.x and 4.x. Focus Pen Pro support is integrated but untested with a real pen.",
+        "Scope: system, com.android.systemui, com.miui.securitycore, com.xiaomi.touchservice.",
+        "Original code is Apache-2.0. ROM-derived material is excluded from that licence; see the NOTICE file.",
+        "Credits FocusPenProX for exploring Pro gestures, mouse and laser features.",
+        "Does not mention haptics or vibration control."
+      ],
+      "tags": [
+        "lsposed",
+        "settings",
+        "hyperos"
+      ],
+      "related": [
+        "src-focuspenprox"
+      ],
+      "basis": "Project README read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-focuspenprox",
+      "type": "source",
+      "title": "FocusPenProX (LSPosed module)",
+      "vendor": "Xiaomi",
+      "category": "System modification",
+      "status": "verified",
+      "priority": "high",
+      "url": "https://github.com/HMQYHM/FocusPenProX",
+      "links": [
+        {
+          "label": "Mirror in the Xposed modules repository",
+          "url": "https://github.com/Xposed-Modules-Repo/io.github.hmqyhm.focuspenpro/"
+        }
+      ],
+      "summary": "LSPosed module that adds gestures, a stylus mouse and laser-brush options for the Focus Pen Pro on HyperOS 3 and 4.",
+      "details": [
+        "Verified on a Xiaomi Pad 8 Pro (25091RP04C) with the Focus Pen Pro. Other models are not guaranteed.",
+        "Features: allowlisted gesture enhancement, a stylus mouse, double-pinch, four-pinch and hold gestures, pen up and down gestures sent as volume keys, laser-brush colours.",
+        "Needs root and LSPosed. GPL-3.0-only.",
+        "Does not mention haptics or vibration control."
+      ],
+      "tags": [
+        "lsposed",
+        "gestures",
+        "hyperos"
+      ],
+      "related": [
+        "dev-xiaomi-focus-pen-pro",
+        "src-focuspen"
+      ],
+      "basis": "Project README read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-hipaint",
+      "type": "source",
+      "title": "HiPaint (Aige Studio)",
+      "vendor": "OnePlus",
+      "category": "Approved third-party app",
+      "status": "unverified",
+      "priority": "critical",
+      "url": "https://www.aige-studio.com/",
+      "links": [],
+      "summary": "Drawing app that the README names as one of the approved third-party apps with Stylo 2 haptics on stock firmware.",
+      "details": [
+        "Verified in the README: approved third-party apps such as HiPaint go through a separate OnePlus developer SDK that authenticates each app with OnePlus.",
+        "Unverified: the Reddit investigation reports that HiPaint contains SDK code for haptics and tool switching.",
+        "This is the clearest evidence of an officially supported route for third-party apps."
+      ],
+      "tags": [
+        "hipaint",
+        "partner-sdk"
+      ],
+      "related": [
+        "if-oneplus-partner-sdk",
+        "src-reddit-stylo2",
+        "gap-oneplus-sdk-access"
+      ],
+      "basis": "README statement checked. HiPaint package not inspected.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-huawei-mpencil",
+      "type": "source",
+      "title": "Huawei M-Pencil Pro product and support pages",
+      "vendor": "Huawei",
+      "category": "Hardware specification",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "https://consumer.huawei.com/uk/accessories/m-pencil-pro/",
+      "links": [
+        {
+          "label": "Product page",
+          "url": "https://consumer.huawei.com/uk/accessories/m-pencil-pro/"
+        },
+        {
+          "label": "Tactile feedback and gestures (zh-CN)",
+          "url": "https://consumer.huawei.com/cn/support/content/zh-cn16058712/"
+        },
+        {
+          "label": "Pressure and compatibility (zh-CN)",
+          "url": "https://consumer.huawei.com/cn/support/content/zh-cn15974440/"
+        },
+        {
+          "label": "Huawei Developer portal",
+          "url": "https://developer.huawei.com/consumer/en/"
+        }
+      ],
+      "summary": "Huawei's product and support pages for the M-Pencil Pro. They describe its haptics as tied to supported gestures and system behaviour.",
+      "details": [
+        "No public Android API for issuing arbitrary M-Pencil Pro haptic commands has been found."
+      ],
+      "tags": [
+        "nearlink"
+      ],
+      "related": [
+        "dev-huawei-mpencil-pro",
+        "gap-huawei-api"
+      ],
+      "basis": "Research inventory.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-jjhitel-fix-odm",
+      "type": "source",
+      "title": "fix-odm-oplus-pad2pro (Stylus Fixes for OnePlus, v1.2)",
+      "vendor": "OnePlus",
+      "category": "Community implementation",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://github.com/jjhitel/fix-odm-oplus-pad2pro",
+      "links": [
+        {
+          "label": "v1.2 release zip",
+          "url": "https://github.com/jjhitel/fix-odm-oplus-pad2pro/releases/download/v1.2/fix-odm-oplus-pad2pro_v1.2.zip"
+        },
+        {
+          "label": "XDA thread",
+          "url": "https://xdaforums.com/t/magisk-module-stylus-fix-for-oneplus-on-different-regional-rom.4753007/"
+        }
+      ],
+      "summary": "The Magisk module from the XDA regional-ROM thread. It copies pen firmware the ROM already has into a directory named after the tablet's own project number, then overlays that onto /odm/firmware.",
+      "details": [
+        "Author jjhitel (Jeong Seongpil). GPL-3.0. v1.0 to v1.2, 4 to 19 Aug 2025. A reference copy of the scripts is in research/reference/fix-odm-oplus-pad2pro/.",
+        "Install (customize.sh): reads ro.boot.prjname. Aborts unless it is five digits and ro.product.system.manufacturer is oplus.",
+        "Lists the other five-digit directories in /odm/firmware/wireless_pen/, sorted. With one, it uses it. With several, it is meant to take the next untried one on each re-flash, tracked by marker files.",
+        "Copies every *.bin from the chosen directory into the module's odm/firmware/wireless_pen/<prjname>/, with SELinux context vendor_configs_file.",
+        "Every boot (post-fs-data.sh): mounts an overlay on /odm/firmware with its upper layer in /dev/anyfs (RAM), so the new directory appears alongside the stock ones. It does this mount itself instead of relying on the root manager.",
+        "Ships no firmware. It only reuses files already on the tablet.",
+        "History: v1.0 supported only the OnePlus Pad 2 Pro (prjname 24926 or 24976). It copied 24976's file into 24926 and forced ro.boot.prjname=24976. v1.1 added the overlay mount (credit AestasBritannia). v1.2 made it generic and stopped forcing the property.",
+        "Caveats found in the code: re-flash marker files probably don't survive, because Magisk empties the module folder on each install, so it may always pick the lowest-numbered directory. With no other directory it still reports success. On a tablet that already has its own directory, it replaces that firmware with another variant's.",
+        "It doesn't check firmware compatibility, so a successful install doesn't prove the chosen file is right.",
+        "Full write-up: research/docs/pen-attach-handshake.md"
+      ],
+      "tags": [
+        "magisk",
+        "overlayfs",
+        "prjname",
+        "regional-rom"
+      ],
+      "related": [
+        "src-xda-regional-stylus-fix",
+        "src-cxzlw-pen-enabler",
+        "if-cps8601-firmware",
+        "c-pen-attach-handshake",
+        "gap-pen-firmware-directory"
+      ],
+      "basis": "Uploaded v1.2 zip (SHA-256 9371189d…6484331) compared with the GitHub repo at commit 0131a9d; scripts identical. Read 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-lenovo-ap600u",
+      "type": "source",
+      "title": "Lenovo Tab Pen Pro AP600U specifications",
+      "vendor": "Lenovo",
+      "category": "Hardware specification",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "https://support.lenovo.com/pr/en/accessories/acc500381-overview-lenovo-tab-pen-pro-ap600u",
+      "links": [
+        {
+          "label": "Official specification",
+          "url": "https://support.lenovo.com/pr/en/accessories/acc500381-overview-lenovo-tab-pen-pro-ap600u"
+        },
+        {
+          "label": "Specification mirror",
+          "url": "https://datacentersupport.lenovo.com/zm/en/accessories/acc500381"
+        },
+        {
+          "label": "Support and drivers",
+          "url": "https://support.lenovo.com/"
+        }
+      ],
+      "summary": "Lenovo's spec pages for the AP600U, which name the LPP pen protocol and list the pen as having haptics.",
+      "details": [
+        "The parts listing describes the pen as \"Parker Pen; LPP3.0/2.0; AP600U; W/ Haptic\"."
+      ],
+      "tags": [
+        "lpp",
+        "ble"
+      ],
+      "related": [
+        "dev-lenovo-ap600u",
+        "gap-lenovo-lpp"
+      ],
+      "basis": "Research inventory.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-project-readme",
+      "type": "source",
+      "title": "README.md: project basis and scope",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "The repository's own statement of the basis, the in-scope routes and the out-of-scope items for the haptics research.",
+      "details": [
+        "Path: README.md at the repository root.",
+        "Basis as stated: on a Pad 3 everything the Stylo 2 does works in every app except haptics, which work only in OnePlus Notes and a few approved apps. Pen input is an uplink through Android's stylus stack. Haptics are a control command to the pen, routed through com.oplus.ipemanager and protected by com.oplus.permission.safe.IOT.",
+        "It then says the motor, the command path and the Bluetooth link work and that what a third-party app lacks is authorisation, and marks this as resting on the owner's report until the first on-device session confirms it. This database holds it as unverified (c-trust-boundaries).",
+        "Routes in scope: A, unprivileged binder (android/stylo2-poc); B, direct Bluetooth LE (android/stylus-ble-inspector and J); C, official authorisation (B-feasibility); and the tablet-vibrator fallback, labelled as not the pen.",
+        "Out of scope: bypassing safe.IOT, the service's caller checks or OnePlus's app authentication; root, Magisk, priv-app or firmware changes as the delivery method; re-implementing pen input; sending the pen bytes nobody has observed.",
+        "Its status section says the Rust workspace builds with 26 passing tests, the Android modules compile, and the read-out tool runs against a simulated device. All are host claims (repo-stylo2-interop-track).",
+        "It maps the database status verified to include a read-out from a real device.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related.",
+        "Licence, as stated: not settled. The Cargo manifests declare Apache-2.0 OR MIT, but there are no LICENSE files and the rest of the repository declares none."
+      ],
+      "tags": [
+        "readme",
+        "scope",
+        "basis"
+      ],
+      "related": [
+        "c-trust-boundaries",
+        "plan-route-feasibility",
+        "repo-stylo2-interop-track",
+        "src-stylo2-pickup",
+        "src-project-rules"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-project-rules",
+      "type": "source",
+      "title": "CLAUDE.md: standing rules for work on the tablet and the data",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "verified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "The rules every session follows: no cracking, a read-only tablet, ask before changes, pen writes only from captured bytes, honest status labels.",
+      "details": [
+        "Path: CLAUDE.md at the repository root. Read in full on 2 Nov 2026.",
+        "No cracking: no bypassing signature, permission or app-authentication checks, and no extracting or reusing vendor signing keys, certificates or tokens. A route that needs any of that is recorded as a finding and stopped. No patching OnePlus apps or firmware. One owner-approved decompiling exception (2 Nov 2026): JADX on the tablet's own copy of com.oplus.ipemanager, interface classes only, recording only names, codes and signatures via research/tools/aidl_check.py. Reading an APK's public signer fingerprint still needs the owner's go-ahead.",
+        "The tablet is read-only. Allowed reads: getprop, ls, cat, dumpsys, pm path and pm list, logcat -d, dmesg, modinfo, sha256sum, find, adb pull. research/tools/pad3_readout.py enforces this.",
+        "Ask the owner first before installing or uninstalling an app (including this repository's own apps), changing a setting (including the HCI snoop log), starting Shizuku, or writing to the pen.",
+        "Root is never needed for what the project ships. If the tablet is rooted, su may be used for reads only.",
+        "Pen writes: only bytes captured from OnePlus Notes on this device. No fuzzing.",
+        "Never report an unauthorised or failed call as success. Works means the pen physically vibrated. Pen input and Notes must keep working; if probing disrupts them, stop and tell the owner.",
+        "Data: pulled files go in research/local/ and are never committed; redact Bluetooth addresses, serial numbers, IMEIs and account names; set status honestly (verified only for what was read or observed on the device, with build and date in basis); set updated on every changed record.",
+        "Code: do not change AIDL transaction codes, interface descriptors or profile integers without device evidence. app/ is upstream code and is left unchanged unless the owner asks.",
+        "Effect on this database: the ledger's JADX experiment for Q10 is allowed in the narrowed form of PICKUP.md Step 2b (gap-aidl-matches-firmware), and the B0 comparison of signing certificates needs the owner's decision (c-trust-boundaries)."
+      ],
+      "tags": [
+        "rules",
+        "boundaries",
+        "read-only"
+      ],
+      "related": [
+        "plan-pad3-readout",
+        "plan-route-a-poc-run",
+        "plan-hci-snoop-capture",
+        "plan-ble-independent-access-test",
+        "gap-aidl-matches-firmware",
+        "c-trust-boundaries",
+        "src-stylo2-pickup",
+        "src-project-readme",
+        "gap-unprivileged-execution",
+        "gap-second-gatt-client-disruption",
+        "gap-captured-write-buzzes-pen"
+      ],
+      "basis": "CLAUDE.md read in full from the repository on 2 Nov 2026. It is a rules file; it makes no claims about the device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-reddit-stylo2",
+      "type": "source",
+      "title": "Reddit: Stylo 2 app support",
+      "vendor": "OnePlus",
+      "category": "Community research",
+      "status": "unverified",
+      "priority": "critical",
+      "url": "https://www.reddit.com/r/oneplus/comments/1n0rwq1/stylo_2_app_support/",
+      "links": [],
+      "summary": "Community investigation into how OnePlus Notes and HiPaint reach Stylo 2 haptics.",
+      "details": [
+        "Reports that OnePlus Notes binds to an Oplus system service.",
+        "Reports that HiPaint contains SDK code for Stylo 2 haptics and tool switching.",
+        "Reports that an independently recreated implementation reproduced the haptics but ran into permission restrictions, which the author got past with root."
+      ],
+      "tags": [
+        "notes",
+        "hipaint",
+        "permission"
+      ],
+      "related": [
+        "src-hipaint",
+        "if-oplus-ipemanager",
+        "repo-stylo2-haptics"
+      ],
+      "basis": "Summarised in the research inventory. Not re-read.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-revanced-180",
+      "type": "source",
+      "title": "ReVanced issue #180: Stylo 2 haptics in patched StarNote",
+      "vendor": "OnePlus",
+      "category": "Issue report",
+      "status": "unverified",
+      "priority": "high",
+      "url": "https://github.com/AmpleReVanced/revanced-patches/issues/180",
+      "links": [],
+      "summary": "Reports that a patched StarNote build loses Stylo 2 haptics while the unmodified app keeps them.",
+      "details": [
+        "A contributor suspects that the Oplus client class PencilManagerUnitClient checks the calling app's package signature. Nobody has confirmed this.",
+        "If it holds, access to haptics depends on which app is calling, not only on a permission.",
+        "Route notes: step 3 of the isolating experiment would show whether the service rejects an ordinary caller after a bind (gap-caller-validation-after-bind)."
+      ],
+      "tags": [
+        "starnote",
+        "app-identity"
+      ],
+      "related": [
+        "if-oplus-pencilmanagerunitclient",
+        "gap-oneplus-sdk-access",
+        "gap-caller-validation-after-bind"
+      ],
+      "basis": "Summarised in the research inventory. Not re-read. Extended on 2 Nov 2026 from stylo2/docs/H-trust-boundaries.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-a-reconnaissance",
+      "type": "source",
+      "title": "stylo2/docs/A-reconnaissance.md: desk reconnaissance",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "Desk reconnaissance of the OnePlus binder, permission, Bluetooth and SDK picture on 2 Nov 2026, each finding tagged verified, reported or hypothetical.",
+      "details": [
+        "Path: stylo2/docs/A-reconnaissance.md.",
+        "Its 'verified' means checked against the named artifact, mostly this repository's code. It does not mean checked on a device.",
+        "Code facts it records: the bind action and package, the service component from the README, the reconstructed AIDL (12 codes, 4 callbacks), the Vibration enum, the descriptor check in the client, and the root module's priv-app install.",
+        "Reported only: that the reconstruction matches the installed service; that the permission level is at least privileged (the evidence is the priv-app install, plus listings that show the permission name with no level).",
+        "Hypothetical: a signature check on top of the permission; GATT access for a second client; a writable haptic characteristic; its encoding; the effect of a second connection; whether Companion Device Manager helps.",
+        "Negative result: a web search on 2 Nov 2026 found no public OnePlus or OPPO Pencil SDK or integration docs. That search cannot be repeated from this repository.",
+        "Not performed: downloading or decompiling the Smart Accessories APK.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "reconnaissance",
+        "desk-research"
+      ],
+      "related": [
+        "if-oplus-ipemanager",
+        "if-oplus-sdk-interface",
+        "gap-iot-permission-level",
+        "gap-aidl-matches-firmware",
+        "gap-oneplus-sdk-access",
+        "gap-haptic-over-gatt",
+        "gap-second-gatt-client-access",
+        "src-stylo2-i-evidence-ledger"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-b-feasibility",
+      "type": "source",
+      "title": "stylo2/docs/B-feasibility.md: four routes compared",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "Assessment of the four routes to the pen's motor under a stock, non-rooted, own-certificate constraint.",
+      "details": [
+        "Path: stylo2/docs/B-feasibility.md.",
+        "Routes: official OnePlus SDK (unknown), binder to com.oplus.ipemanager (stated as not available to an ordinary app), direct BLE (unknown, possibly impossible), Android vibrator fallback (available, but plays the tablet's motor).",
+        "Bottom line: no route to the pen's own motor is verified to work on a stock device.",
+        "Order of investigation it recommends: BLE reconnaissance first, official-SDK enquiry in parallel, fallback meanwhile. PICKUP.md instead starts with the Route A PoC.",
+        "Conflict: the binder row says an ordinary app gets PermissionDenied as if established, while the evidence ledger lists the protection level, bindability and caller validation as open (gap-iot-permission-level). An unprivileged bind has not been tried on a device.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "feasibility",
+        "routes"
+      ],
+      "related": [
+        "plan-route-feasibility",
+        "gap-oneplus-sdk-access",
+        "gap-iot-permission-level",
+        "src-stylo2-pickup",
+        "src-stylo2-i-evidence-ledger"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-c-protocol",
+      "type": "source",
+      "title": "stylo2/docs/C-protocol.md: reported binder surface and BLE unknowns",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "The reported OnePlus binder surface (binding facts, transaction table, profiles, callbacks) and the unknown direct-BLE surface, with a recon procedure.",
+      "details": [
+        "Path: stylo2/docs/C-protocol.md.",
+        "Part 1 marks the package, action and service component verified in the repository, and the gating permission verified in the repository with its level reported (at least privileged). The descriptor, the 12 transaction codes, the profile integers and the callbacks are marked reported.",
+        "Part 1.5 lists read-only checks to upgrade reported items: the permission level through dumpsys package and the framework permission XML; the service and descriptor through dumpsys activity services; the profile integers through setVibrationType 0 to 4 on an authorised binding.",
+        "Part 2: no UUIDs, characteristics or encodings are known and none are invented. Direct BLE needs five things to hold: the pen is observable to an ordinary app, a second client can discover its GATT while it is bonded to the system, a writable characteristic drives the motor, the payload encoding is known, and a second connection does not disrupt the system link.",
+        "Part 3: the reported interface has no intensity, duration, frequency, waveform or custom-pattern parameter, so the library leaves those capabilities off.",
+        "It calls FUNCTION_VIBRATION (4) a feedback mode rather than a profile. This database treats that as unconfirmed (gap-oneplus-feature-semantics).",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "protocol",
+        "aidl",
+        "profiles"
+      ],
+      "related": [
+        "if-oplus-sdk-interface",
+        "if-oplus-callback",
+        "if-oplus-vibration-presets",
+        "gap-profile-integer-feel",
+        "gap-aidl-matches-firmware",
+        "gap-haptic-over-gatt",
+        "gap-oneplus-feature-semantics",
+        "src-stylo2-i-evidence-ledger",
+        "plan-pad3-readout",
+        "if-oplus-ipemanager"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-e-prototype",
+      "type": "source",
+      "title": "stylo2/docs/E-prototype.md: prototype behaviour and test matrix",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "What the route prototype is expected to show in each access situation, and the 12-row physical-device test matrix, not yet run.",
+      "details": [
+        "Path: stylo2/docs/E-prototype.md.",
+        "Five access situations with expected behaviour: ordinary install (service detected, bind gives PermissionDenied, stated as most likely); service absent (ServiceUnavailable); verified direct BLE; vendor-authorised binder; tablet-vibrator fallback.",
+        "The first row is an expectation, not an observation. With the repository's own client, PermissionDenied comes from its permission check before any bind is tried (if-oplus-call-sequence), not from Android refusing a bind.",
+        "The matrix has 12 tests, all unticked. Method tags: inspection, static, emulator, adb, physical. A row must not be passed from a successful build.",
+        "It says the host suite has 22 tests. The code has 26 and all passed on 2 Nov 2026 (repo-stylo2-interop-track).",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "test-matrix",
+        "prototype"
+      ],
+      "related": [
+        "plan-device-test-matrix",
+        "if-oplus-call-sequence",
+        "repo-stylo2-interop-track",
+        "src-stylo2-pickup"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-g-local-continuation",
+      "type": "source",
+      "title": "stylo2/docs/G-local-continuation.md: device procedure",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "Step-by-step procedure for the device session: read-only inventory, HCI snoop of OnePlus Notes, the split-screen method, independent BLE access, and feeding results back.",
+      "details": [
+        "Path: stylo2/docs/G-local-continuation.md.",
+        "Section 0: two observation layers see different things. The HCI snoop sees the system's link and shows what Notes sends. The BLE inspector is a second GATT client with its own connection and cannot see Notes' writes.",
+        "Section 0 also warns that the service name .btadsorb may mean the haptic path is not a plain GATT write, and says the snoop decides.",
+        "Sections: 1 prerequisites (Rust and NDK, Android Studio, adb, wireless debugging, Shizuku, BlueShark, Wireshark); 3 read-only device inventory; 4 capture options; 5 split-screen method; 6 independent access test; 7 feeding results into the code; 8 first-30-minutes checklist; 9 success criteria per route; 10 boundaries.",
+        "Shizuku is started over ADB and is not root. The only state-changing step it plans is writing captured bytes to the pen (section 6). Installing the inspector, turning on the HCI snoop log and starting Shizuku also need the owner's go-ahead (CLAUDE.md).",
+        "Section 3's commands are what research/tools/pad3_readout.py runs; the guide keeps them for reference (plan-pad3-readout).",
+        "Section 7 asks for setVibrationType 0 to 4. The matrix in E says profiles 0 to 3.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "procedure",
+        "adb",
+        "device-session"
+      ],
+      "related": [
+        "plan-pad3-readout",
+        "plan-hci-snoop-capture",
+        "plan-ble-independent-access-test",
+        "c-observing-on-device",
+        "src-bluetooth-analysis-tools",
+        "src-stylo2-pickup"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-h-trust-boundaries",
+      "type": "source",
+      "title": "stylo2/docs/H-trust-boundaries.md: boundaries and isolating experiment",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "Architecture sketch of the binder and direct-BLE paths, the boundary table B0 to B4 with enforcement points, and the four-step isolating experiment.",
+      "details": [
+        "Path: stylo2/docs/H-trust-boundaries.md.",
+        "Two candidate paths to the motor: the binder path (how Notes works) crosses B1 and B2, then B3 and B4; the direct-BLE path tries to reach B3 and B4 without B1 and B2.",
+        "Boundary table: B0 signing identity (reported), B1 permission grant (reported, at least privileged inferred), B2 caller validation in the service (hypothesis), B3 Bluetooth bond and link encryption (hypothesis), B4 vendor framing and session authentication (hypothesis). Each has an experiment.",
+        "Four-step isolating experiment: discovery, binding, authorization, execution, read off the first step that fails.",
+        "Target state machine: Disconnected, Discovering, Connecting, Connected, Initialising, Ready, with Failed from any state. Only Ready would accept commands. Not built.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "trust-boundary",
+        "isolation"
+      ],
+      "related": [
+        "c-trust-boundaries",
+        "plan-trust-boundary-isolation",
+        "gap-iot-permission-level",
+        "gap-service-discovery-and-bind",
+        "gap-caller-validation-after-bind",
+        "gap-second-gatt-client-access",
+        "gap-second-gatt-client-disruption",
+        "gap-session-handshake",
+        "src-stylo2-i-evidence-ledger",
+        "plan-route-a-poc-run",
+        "gap-unprivileged-execution"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-i-evidence-ledger",
+      "type": "source",
+      "title": "stylo2/docs/I-evidence-ledger.md: claims and open questions",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "Every route claim with a verified, reported or hypothesis label, plus eleven open questions that each name an exact experiment.",
+      "details": [
+        "Path: stylo2/docs/I-evidence-ledger.md.",
+        "Its labels: [V] confirmed from the repository or a primary source (not the live device), [R] community or secondary, or this repository's reproduction of a vendor interface, [H] open.",
+        "Mapping used in this database: verified only where the code in this repository settles it; anything about device behaviour never run on a device is unverified; reported becomes unverified; hypothesis becomes inferred; open questions become open.",
+        "The ledger marks the owner's statement 'everything works except third-party haptics' as [V]. Here it is unverified: it is the owner's report and nothing has been run on a device.",
+        "Open questions and their records: Q1 gap-iot-permission-level; Q2 gap-service-discovery-and-bind; Q3 gap-caller-validation-after-bind; Q4 gap-haptic-over-gatt; Q5 gap-haptic-command-bytes; Q6 gap-second-gatt-client-access; Q7 gap-second-gatt-client-disruption; Q8 gap-session-handshake; Q9 gap-captured-write-buzzes-pen; Q10 gap-aidl-matches-firmware; Q11 gap-oneplus-sdk-access.",
+        "The Q4 row cites 'J section 4' for its experiment. J has no section 4; the capture options are in section 4 of G and the nine scenarios are in J.",
+        "Host-side rows: the workspace compiles, 26 tests pass, clippy is clean, the jni feature type-checks, and the Android modules compile with the inspector's unit tests passing (the last row was changed from not built to verified on 2 Nov 2026). The tests and clippy were run again for this database (repo-stylo2-interop-track). The jni check and the Gradle run were not repeated.",
+        "Marks the interface rows (descriptor, methods, callbacks, profile integers) as reported. The interface records here are verified against the repository's code only (see gap-aidl-matches-firmware).",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "ledger",
+        "evidence",
+        "open-questions"
+      ],
+      "related": [
+        "c-trust-boundaries",
+        "repo-stylo2-interop-track",
+        "gap-iot-permission-level",
+        "gap-service-discovery-and-bind",
+        "gap-caller-validation-after-bind",
+        "gap-haptic-over-gatt",
+        "gap-haptic-command-bytes",
+        "gap-second-gatt-client-access",
+        "gap-second-gatt-client-disruption",
+        "gap-session-handshake",
+        "gap-captured-write-buzzes-pen",
+        "gap-aidl-matches-firmware",
+        "gap-oneplus-sdk-access",
+        "dev-oneplus-stylo2",
+        "src-stylo2-h-trust-boundaries",
+        "src-stylo2-j-capture-plan",
+        "src-stylo2-a-reconnaissance",
+        "src-stylo2-b-feasibility",
+        "src-stylo2-c-protocol",
+        "gap-profile-integer-feel",
+        "if-oplus-ipemanager",
+        "if-oplus-sdk-interface"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-j-capture-plan",
+      "type": "source",
+      "title": "stylo2/docs/J-capture-plan.md: nine HCI-snoop captures",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "Method and empty tables for nine controlled HCI-snoop captures of OnePlus Notes driving the pen.",
+      "details": [
+        "Path: stylo2/docs/J-capture-plan.md.",
+        "Principles: Notes is the oracle; HCI snoop first; an external sniffer only if the snoop misses packets; absence of a packet does not prove absence of a path; change one variable per capture.",
+        "Nine scenarios: idle baseline, Pencil, Eraser, Ballpoint, Pen, feedback on, feedback off, disconnect and reconnect, initial connection from a powered-off pen.",
+        "A fixed recording schema per action, ending in vibration_observed as the ground truth.",
+        "Empty correlation tables for profile selection, feedback on and off, and session or connection steps. Nothing has been filled in.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "capture",
+        "hci-snoop"
+      ],
+      "related": [
+        "plan-hci-snoop-capture",
+        "gap-haptic-over-gatt",
+        "gap-haptic-command-bytes",
+        "gap-session-handshake",
+        "gap-oneplus-transport",
+        "c-pen-attach-handshake",
+        "src-bluetooth-analysis-tools",
+        "src-stylo2-i-evidence-ledger",
+        "gap-captured-write-buzzes-pen"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-mission",
+      "type": "source",
+      "title": "stylo2/docs/MISSION.md: the interoperability brief",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "The canonical brief for the non-root interoperability track: goal, non-negotiables, deliverable map, capture method and acceptance criteria.",
+      "details": [
+        "Path: stylo2/docs/MISSION.md.",
+        "Goal: enable native Stylo 2 haptics in third-party apps on a stock, non-rooted OnePlus Pad 3 (OxygenOS 16, Android 16), or show with evidence which authorization boundary prevents it and what the least-restrictive legitimate alternative is.",
+        "Non-negotiables: no root, Magisk, KernelSU, bootloader unlock or system change; invent no keys, packet formats, UUIDs, permissions or authorization behaviour; keep feasibility, policy, risk and legal questions apart; do not misrepresent the app's identity.",
+        "Nine deliverables. The physical Pad 3 test report is pending hardware. The unresolved questions with an experiment each are in the evidence ledger (src-stylo2-i-evidence-ledger).",
+        "Method: nine controlled captures with a fixed recording schema, HCI snoop first, an external BLE sniffer only if the snoop is not enough.",
+        "Acceptance criteria: the cause is identified and evidenced, each verified profile selects, on and off are reliable, reconnection is handled, normal input and Notes keep working, no root or system change, nothing undocumented presented as fact.",
+        "State machine: the code ships five states (Disconnected, Connecting, Connected, PermissionDenied, ServiceUnavailable). The seven-state lifecycle is the target once a real session flow is verified.",
+        "It describes the test tablet as stock and non-rooted. The upstream README describes a tablet converted from OPD2413 to OPD2415, and PICKUP.md says the tablet's root and fix-module state is not established (dev-oneplus-pad3).",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "mission",
+        "acceptance-criteria",
+        "deliverables"
+      ],
+      "related": [
+        "c-trust-boundaries",
+        "plan-device-test-matrix",
+        "plan-architecture",
+        "plan-route-feasibility",
+        "repo-stylo2-interop-track",
+        "dev-oneplus-pad3",
+        "src-stylo2-pickup"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-stylo2-pickup",
+      "type": "source",
+      "title": "PICKUP.md: playbook for the local session with the Pad 3",
+      "vendor": "OnePlus",
+      "category": "Project document",
+      "status": "unverified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "The ordered playbook for a Claude Code session with the Pad 3 attached: read-outs, the Route A run, the handshake, Route B, and where each result is recorded.",
+      "details": [
+        "Path: PICKUP.md at the repository root. It replaces two earlier handoffs, the firmware read-out prompt and the route-testing brief.",
+        "Steps: 0 host baseline; 1 tablet check (read-only); 2 read-out and firmware retrieval (read-only); 3 Route A PoC (ask first, it installs an app); 4 attach handshake (guided); 5 Route B (ask first, turning on the HCI snoop log is a settings change and Shizuku and BlueShark are extra apps); 6 record and commit.",
+        "Tools it names: research/tools/pad3_readout.py (check, identify, firmware, modules, driver, service, bluetooth, handshake, poc-log, all) and research/tools/fwinfo.py. The read-out lands in research/local/pad3/, which git ignores.",
+        "Step 2 includes the protection level of safe.IOT, read two ways. Its expectation, not a result: if the level includes signature, an ordinary app can never hold the permission and Route A should fail at bind.",
+        "Its 'already known' list labels the path apps to com.oplus.ipemanager to Bluetooth LE to the pen as verified from the upstream app code and community sources. The code and README show the service talks to the pen over Bluetooth. Bluetooth LE and the channel come from the charger handshake log and are not shown by any code. This database keeps c-pen-attach-handshake inferred and gap-haptic-over-gatt open.",
+        "It says it is not established whether the tablet is rooted or has a pen-fix module. MISSION.md and stylo2/README.md describe the target as stock and non-rooted.",
+        "Rules in short: the tablet is read-only, root only for reads, ask before anything that changes the tablet, write to the pen only bytes captured from Notes, a route that needs a bypass is a finding, and works means the pen physically vibrated. The full rules are in CLAUDE.md (src-project-rules).",
+        "It has an unfilled marker for the ordered list of open questions. The route gaps in this database are written to fill it.",
+        "It says the Rust workspace has 26 passing tests, which matches the run on 2 Nov 2026.",
+        "Status here describes the document as a source: written without a device, so its device claims are unchecked. Each claim is tracked in the records listed under related."
+      ],
+      "tags": [
+        "pickup",
+        "device-session",
+        "playbook"
+      ],
+      "related": [
+        "plan-pad3-readout",
+        "plan-route-a-poc-run",
+        "plan-hci-snoop-capture",
+        "plan-ble-independent-access-test",
+        "plan-trust-boundary-isolation",
+        "plan-research-order",
+        "c-trust-boundaries",
+        "repo-stylo2-interop-track",
+        "src-project-rules",
+        "src-project-readme",
+        "src-stylo2-g-local-continuation",
+        "src-stylo2-mission",
+        "src-stylo2-b-feasibility",
+        "src-stylo2-e-prototype",
+        "plan-route-feasibility",
+        "dev-oneplus-pad3"
+      ],
+      "basis": "Read in full from the repository on 2 Nov 2026. Claims were compared with the code where the code could settle them. Nothing in it was checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-usb-hid-haptics",
+      "type": "source",
+      "title": "USB-IF: HID Haptics usage page proposals",
+      "vendor": "USB-IF",
+      "category": "Standard",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "https://usb.org/sites/default/files/hutrr63b_-_haptics_page_redline_0.pdf",
+      "links": [
+        {
+          "label": "HUTRR63b: Haptics page",
+          "url": "https://usb.org/sites/default/files/hutrr63b_-_haptics_page_redline_0.pdf"
+        },
+        {
+          "label": "HUTRR118: Haptics expansion (Collide, Align, Step, Grow)",
+          "url": "https://usb.org/sites/default/files/hutrr118-hapticsexpansion_1.pdf"
+        }
+      ],
+      "summary": "The HID Usage Tables proposals that define the Haptics page (0x0E) used by Windows haptic pens.",
+      "details": [
+        "Linked from Microsoft's guide. The PDFs themselves have not been read."
+      ],
+      "tags": [
+        "hid",
+        "standard"
+      ],
+      "related": [
+        "if-hid-haptics-page"
+      ],
+      "basis": "Links found through Microsoft's documentation.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-usi",
+      "type": "source",
+      "title": "Universal Stylus Initiative (USI)",
+      "vendor": "Cross-vendor",
+      "category": "Standard",
+      "status": "verified",
+      "priority": "medium",
+      "url": "https://en.wikipedia.org/wiki/Universal_Stylus_Initiative",
+      "links": [
+        {
+          "label": "Overview",
+          "url": "https://en.wikipedia.org/wiki/Universal_Stylus_Initiative"
+        },
+        {
+          "label": "USI press releases",
+          "url": "https://universalstylus.org/press-releases"
+        }
+      ],
+      "summary": "Open active-stylus standard used mainly on Chromebooks and some Android tablets.",
+      "details": [
+        "USI 2.0 was announced on 28 February 2022. Headline additions: NFC wireless charging based on NFC Forum WLC 2.0, support for in-cell display panels, more tilt support.",
+        "The full specification is available only to members.",
+        "No public source found that USI defines pen haptics."
+      ],
+      "tags": [
+        "usi",
+        "standard"
+      ],
+      "related": [
+        "c-pen-sensing",
+        "gap-usi-haptics"
+      ],
+      "basis": "Search results from Wikipedia and press coverage, 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-windows-haptic-pen-guide",
+      "type": "source",
+      "title": "Microsoft: Haptic Pen Implementation Guide",
+      "vendor": "Microsoft",
+      "category": "Hardware specification",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/haptic-pen-implementation-guide",
+      "links": [
+        {
+          "label": "Haptic Pen Implementation Guide",
+          "url": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/haptic-pen-implementation-guide"
+        },
+        {
+          "label": "Input Device Haptics Implementation Guide (touchpads and mice)",
+          "url": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/input-haptics-implementation-guide"
+        }
+      ],
+      "summary": "Microsoft's public device-side contract for haptic pens: HID over Bluetooth, standard waveforms, and how the host correlates the pen with digitizer input.",
+      "details": [
+        "This is the only fully public, vendor-neutral specification found for how a host talks to a pen's haptic motor."
+      ],
+      "tags": [
+        "hid",
+        "bluetooth",
+        "windows"
+      ],
+      "related": [
+        "if-windows-haptic-pen-device",
+        "if-hid-haptics-page",
+        "c-pen-identity"
+      ],
+      "basis": "Read on 2 Nov 2026 (page dated 25 Mar 2026).",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-windows-pen-haptics",
+      "type": "source",
+      "title": "Microsoft: pen haptic feedback in Windows apps",
+      "vendor": "Microsoft",
+      "category": "Platform documentation",
+      "status": "verified",
+      "priority": "high",
+      "url": "https://learn.microsoft.com/en-us/windows/apps/develop/input/pen-haptics",
+      "links": [],
+      "summary": "App-side API for pen haptics on Windows 11. It is the clearest example of a vendor-neutral pen haptics API.",
+      "details": [],
+      "tags": [
+        "windows",
+        "reference-api"
+      ],
+      "related": [
+        "if-windows-pen-haptics-api",
+        "c-feedback-models"
+      ],
+      "basis": "Read on 2 Nov 2026 (page dated 10 Jul 2026).",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-xda-regional-stylus-fix",
+      "type": "source",
+      "title": "XDA: Stylus Fix for OnePlus on Different Regional ROM",
+      "vendor": "OnePlus",
+      "category": "Community implementation",
+      "status": "unverified",
+      "priority": "high",
+      "url": "https://xdaforums.com/t/magisk-module-stylus-fix-for-oneplus-on-different-regional-rom.4753007/",
+      "links": [
+        {
+          "label": "Stylus Fix for OnePlus on Different Regional ROM",
+          "url": "https://xdaforums.com/t/magisk-module-stylus-fix-for-oneplus-on-different-regional-rom.4753007/"
+        },
+        {
+          "label": "Found the way to fix stylus for OnePlus Pad 3 COS to OOS",
+          "url": "https://xdaforums.com/t/found-the-way-to-fix-stylus-for-oneplus-pad-3-cos-to-oos.4749818/"
+        },
+        {
+          "label": "Did anyone find a way to fix the stylus after converting to OxygenOS from COS?",
+          "url": "https://xdaforums.com/t/did-anyone-found-a-way-to-fix-the-stylus-after-converting-to-oxygen-os-from-cos.4749547/"
+        },
+        {
+          "label": "Stylus not recognized on OPPO Pad 4 Pro (OPD2413) after converting to OPD2415",
+          "url": "https://xdaforums.com/t/title-q-stylus-not-recognized-on-oppo-pad-4-pro-opd2413-after-converting-to-oneplus-pad-3-global-rom-opd2415.4780653/"
+        },
+        {
+          "label": "Stylo 2 doesn't work with OnePlus Pad 3 COS",
+          "url": "https://xdaforums.com/t/oneplus-stylus-2-doesnt-work-with-oneplus-pad-3-cos.4777470/"
+        }
+      ],
+      "summary": "Magisk module thread by jjhitel for the same problem: the stylus stops working after converting between Chinese and global ROMs. The module is fix-odm-oplus-pad2pro.",
+      "details": [
+        "Module behaviour is documented from its code in the fix-odm-oplus-pad2pro record.",
+        "Listed for the OnePlus Pad 2 Pro (China) and the Pad 3.",
+        "The author says the pen firmware is the same across regions and only the loading path differs, which matches the cxzlw module's finding.",
+        "Mixed user reports: one user swapped only odm.img (ColorOS .501 onto OxygenOS .500 EU) and it worked. Another found the KernelSU module did not work and the odm.img swap caused boot crashes. A third says the pen stopped charging after a later global update.",
+        "The thread itself could not be read: XDA refuses automated access. User reports here come from search-result excerpts."
+      ],
+      "tags": [
+        "magisk",
+        "regional-rom",
+        "odm"
+      ],
+      "related": [
+        "src-cxzlw-pen-enabler",
+        "c-pen-attach-handshake",
+        "dev-oneplus-pad3",
+        "src-jjhitel-fix-odm"
+      ],
+      "basis": "Search-result excerpts, 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-xda-stylo2",
+      "type": "source",
+      "title": "XDA: OnePlus Stylo 2 global haptic feedback",
+      "vendor": "OnePlus",
+      "category": "Community implementation",
+      "status": "verified",
+      "priority": "critical",
+      "url": "https://xdaforums.com/t/magisk-module-app-oneplus-stylo-2-global-haptic-feedback.4758335/",
+      "links": [],
+      "summary": "Discussion and install thread for the Stylo2 Haptics Magisk module and app, which is the project in this repository.",
+      "details": [
+        "The repository README links this thread for discussion and install instructions.",
+        "Module: installs the app to /system/priv-app with a privapp-permissions allowlist on the system, system_ext and product partitions, so Android grants it com.oplus.permission.safe.IOT at boot. The README states that no firmware files are modified.",
+        "App: binds to com.oplus.ipemanager with the action com.oplus.ipemanager.ACTION.PENCIL_SDK and calls setVibrationType and startFeedBackVibration.",
+        "Tested only on a OnePlus Pad 3 running Global OxygenOS (converted from OPD2413 ColorOS to OPD2415), Android 16."
+      ],
+      "tags": [
+        "magisk",
+        "root",
+        "priv-app"
+      ],
+      "related": [
+        "repo-stylo2-haptics",
+        "dev-oneplus-pad3",
+        "if-oplus-ipemanager",
+        "gap-iot-permission-level"
+      ],
+      "basis": "Repository README checked on 2 Nov 2026. The thread itself was not re-read.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-xiaomi-pencil-engine-docs",
+      "type": "source",
+      "title": "Xiaomi Pencil Engine SDK documentation",
+      "vendor": "Xiaomi",
+      "category": "Official SDK",
+      "status": "unverified",
+      "priority": "critical",
+      "url": "https://dev.mi.com/xiaomihyperos/ability/Pencil-Engine",
+      "links": [
+        {
+          "label": "Overview",
+          "url": "https://dev.mi.com/xiaomihyperos/ability/Pencil-Engine"
+        },
+        {
+          "label": "Integration and download",
+          "url": "https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1883"
+        },
+        {
+          "label": "SDK versions",
+          "url": "https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1886"
+        },
+        {
+          "label": "Capabilities",
+          "url": "https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1882"
+        },
+        {
+          "label": "Additional integration notes",
+          "url": "https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1884"
+        }
+      ],
+      "summary": "Xiaomi's official stylus SDK for HyperOS: the most complete public vendor SDK found, though it documents no haptic motor command.",
+      "details": [
+        "Documented version 0.3.2, updated 31 October 2025, distributed as PenEngine-release_x.x.x.aar.",
+        "Requires a Xiaomi developer account with enterprise verification and app registration.",
+        "See the interface record for the package list and capabilities."
+      ],
+      "tags": [
+        "hyperos",
+        "aar",
+        "sdk"
+      ],
+      "related": [
+        "if-xiaomi-pen-engine",
+        "gap-xiaomi-motor-control"
+      ],
+      "basis": "Research inventory. dev.mi.com pages not re-read.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "src-xiaomi-sheng-thp",
+      "type": "source",
+      "title": "xiaomi-sheng-thp (Linux userspace pen and touch driver)",
+      "vendor": "Xiaomi",
+      "category": "Community implementation",
+      "status": "verified",
+      "priority": "high",
+      "url": "https://github.com/ianchb/xiaomi-sheng-thp",
+      "links": [],
+      "summary": "Userspace driver for the Xiaomi Pad 6S Pro 12.4 (\"sheng\") on Linux. It shows pen position coming from the touch controller and pressure coming over Bluetooth.",
+      "details": [
+        "Reads raw THP frames from the NT36532E touch controller through kernel nodes such as /proc/nvt_thp_stylus and exposes standard input devices through uinput.",
+        "Pen coordinates, tilt and hover come from the touch controller stream. Pen scanning works only at 60 Hz or 120 Hz panel refresh.",
+        "Pressure comes from the pen's Bluetooth HID reports (BlueZ required).",
+        "The Focus Pen Pro posture sensor is read separately through libssc.",
+        "No haptics support is mentioned.",
+        "C++20, Apache-2.0, runs as root, needs a kernel with the Xiaomi THP nodes."
+      ],
+      "tags": [
+        "linux",
+        "bluez",
+        "uinput",
+        "pressure"
+      ],
+      "related": [
+        "c-three-subsystems",
+        "dev-xiaomi-focus-pen-pro"
+      ],
+      "basis": "Project README read on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    }
+  ]
+}

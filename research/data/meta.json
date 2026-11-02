@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "title": "Stylus Haptics Research Database",
+  "description": "Everything gathered so far about stylus haptics on Android: sources, devices, interfaces, how the pieces work, plans and open questions. Each record says how well its content has been checked.",
+  "status_legend": {
+    "verified": "Checked on 2 Nov 2026 against a primary source: official documentation, a project's own page, or the code in this repository.",
+    "unverified": "Taken from the research inventory, vendor specifications, community posts or background knowledge. Not yet checked.",
+    "inferred": "A conclusion drawn from verified facts. Treat it as a working hypothesis.",
+    "open": "Unknown. A gap to close before building on it."
+  },
+  "types": {
+    "source": "A link or document to keep",
+    "device": "A stylus or tablet",
+    "interface": "An API, service, protocol or data format",
+    "concept": "How part of the system works",
+    "plan": "Architecture, assessments and research order",
+    "gap": "An open question"
+  },
+  "files": {
+    "source": "sources.json",
+    "device": "devices.json",
+    "interface": "interfaces.json",
+    "concept": "concepts.json",
+    "plan": "plans.json",
+    "gap": "gaps.json"
+  }
+}

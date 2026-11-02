@@ -12,6 +12,12 @@ appcompat = "1.6.1"
 material = "1.10.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
+# Versions used only by :stylus-ble-inspector / :stylo2-bridge (kept as separate
+# entries so the upstream :app dependency versions above stay untouched).
+coreKtxInspector = "1.13.1"
+lifecycleInspector = "2.8.4"
+activityComposeInspector = "1.9.1"
+coroutines = "1.8.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,9 +38,18 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+# :stylus-ble-inspector / :stylo2-bridge
+androidx-core-ktx-inspector = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxInspector" }
+androidx-lifecycle-runtime-ktx-inspector = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleInspector" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleInspector" }
+androidx-activity-compose-inspector = { group = "androidx.activity", name = "activity-compose", version.ref = "activityComposeInspector" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 

@@ -1,0 +1,239 @@
+{
+  "type": "device",
+  "records": [
+    {
+      "id": "dev-apple-pencil-pro",
+      "type": "device",
+      "title": "Apple Pencil Pro (reference outside Android)",
+      "vendor": "Apple",
+      "category": "Reference device",
+      "status": "verified",
+      "priority": "low",
+      "url": "https://developer.apple.com/documentation/uikit/uicanvasfeedbackgenerator",
+      "links": [],
+      "summary": "Haptic pencil whose feedback apps request semantically through UICanvasFeedbackGenerator on compatible iPads.",
+      "details": [
+        "The system decides whether a haptic plays, based on device, app state and battery.",
+        "A developer forum report says the pencil buzzes only for feedback tied to a pencil touch, not a finger touch. Not confirmed by Apple."
+      ],
+      "tags": [
+        "ipados"
+      ],
+      "related": [
+        "if-apple-canvas-feedback"
+      ],
+      "basis": "Apple documentation via search results, 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-huawei-mpencil-pro",
+      "type": "device",
+      "title": "Huawei M-Pencil Pro",
+      "vendor": "Huawei",
+      "category": "Haptic stylus",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "https://consumer.huawei.com/uk/accessories/m-pencil-pro/",
+      "links": [],
+      "summary": "Huawei's haptic pen, with feedback mostly tied to system gestures.",
+      "details": [
+        "10,000+ pressure levels, up to 16,384 on supported configurations.",
+        "Internal haptic motor, squeeze and double-tap gestures.",
+        "NearLink connectivity on compatible hardware. NearLink is a radio link, not a haptics API.",
+        "App and tablet compatibility varies."
+      ],
+      "tags": [
+        "nearlink",
+        "gestures"
+      ],
+      "related": [
+        "src-huawei-mpencil",
+        "gap-huawei-api"
+      ],
+      "basis": "Huawei product pages via the research inventory.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-lenovo-ap600u",
+      "type": "device",
+      "title": "Lenovo Tab Pen Pro (AP600U)",
+      "vendor": "Lenovo",
+      "category": "Haptic stylus",
+      "status": "unverified",
+      "priority": "medium",
+      "url": "https://support.lenovo.com/pr/en/accessories/acc500381-overview-lenovo-tab-pen-pro-ap600u",
+      "links": [],
+      "summary": "Lenovo's haptic pen, which uses the LPP pen protocol and pairs over Bluetooth LE.",
+      "details": [
+        "8,192 pressure levels, tilt detection, six-degree-of-freedom sensing.",
+        "LPP 3.0/2.0 pen protocol, Bluetooth LE pairing, integrated haptics.",
+        "80 mAh battery, Qi wireless charging.",
+        "Having Bluetooth LE and LPP does not show that the motor is controlled through a publicly accessible Bluetooth characteristic."
+      ],
+      "tags": [
+        "lpp",
+        "ble",
+        "qi"
+      ],
+      "related": [
+        "src-lenovo-ap600u",
+        "gap-lenovo-lpp"
+      ],
+      "basis": "Lenovo specification pages via the research inventory.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-oneplus-pad-pro-caihong",
+      "type": "device",
+      "title": "OnePlus Pad Pro (caihong) / Pad 2 (rainbow)",
+      "vendor": "OnePlus",
+      "category": "Tablet",
+      "status": "verified",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "The 2024 OnePlus tablets the original stylus firmware fix was written for.",
+      "details": [
+        "Codename caihong: OnePlus Pad Pro (China). Codename rainbow: OnePlus Pad 2 (global).",
+        "Kernel 6.1.68-android14, from the oplus_wireless_pen.ko module info.",
+        "Pen firmware directories 23926, 23927, 23976 and 23978 under /odm/firmware/wireless_pen/."
+      ],
+      "tags": [
+        "caihong",
+        "rainbow"
+      ],
+      "related": [
+        "src-cxzlw-pen-enabler",
+        "src-crdroid-caihong",
+        "if-cps8601-firmware"
+      ],
+      "basis": "cxzlw README and crDroid device tree.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-oneplus-pad3",
+      "type": "device",
+      "title": "OnePlus Pad 3",
+      "vendor": "OnePlus",
+      "category": "Tablet",
+      "status": "verified",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "The only tablet the repository has been tested on.",
+      "details": [
+        "Global OxygenOS, converted from OPD2413 (ColorOS) to OPD2415, Android 16.",
+        "Other OnePlus and Oppo devices with the same accessory service may work but are untested.",
+        "A converted tablet also needs stylus charger firmware in /odm/firmware/wireless_pen/<prjname>/ before the pen will pair. See the pen attach handshake record.",
+        "It appears to be the same hardware family as the OnePlus Pad 2 Pro (China), whose project numbers are 24926 and 24976. The converted Pad 3 probably reports one of them; confirm with adb shell getprop ro.boot.prjname. Inferred.",
+        "The route docs describe the test tablet as stock and non-rooted (stylo2/docs/MISSION.md). The upstream README's tablet was converted from OPD2413 to OPD2415, and PICKUP.md says it is not established whether this tablet is rooted or has a pen-fix module. Which applies to the tablet in the device session is not recorded. Check it first with the check step of pad3_readout.py (plan-pad3-readout).",
+        "None of the route experiments has been run on it. See plan-device-test-matrix."
+      ],
+      "tags": [
+        "android-16",
+        "oxygenos"
+      ],
+      "related": [
+        "dev-oneplus-stylo2",
+        "repo-stylo2-haptics",
+        "c-pen-attach-handshake",
+        "src-xda-regional-stylus-fix",
+        "src-jjhitel-fix-odm",
+        "gap-pen-firmware-directory",
+        "plan-pad3-readout",
+        "plan-device-test-matrix",
+        "src-stylo2-mission",
+        "src-stylo2-pickup"
+      ],
+      "basis": "Repository README. Extended on 2 Nov 2026 from stylo2/docs/MISSION.md and PICKUP.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-oneplus-stylo2",
+      "type": "device",
+      "title": "OnePlus Stylo 2",
+      "vendor": "OnePlus",
+      "category": "Haptic stylus",
+      "status": "unverified",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "OnePlus's haptic stylus for the Pad 3. Normal pen input already works; haptics are reachable only through OnePlus's system service.",
+      "details": [
+        "Advertised: 16,000 pressure levels.",
+        "Internal linear haptic motor with feedback that changes with the selected tool.",
+        "Verified in the README: the accessory service com.oplus.ipemanager/.btadsorb.CoreService talks to the pen over Bluetooth.",
+        "Owner-reported, not tested by this project: detection, pressure, tilt, hover, normal input and the Bluetooth bond all work with every app, and haptics work inside OnePlus Notes. Only third-party haptics are missing (stylo2/docs/I-evidence-ledger.md). The ledger marks this verified. Here it is unverified, because nothing has been run on a device.",
+        "The motor is in the pen. The route notes list this as reported (README and retailer specifications)."
+      ],
+      "tags": [
+        "linear-motor",
+        "bluetooth"
+      ],
+      "related": [
+        "dev-oneplus-pad3",
+        "if-oplus-ipemanager",
+        "if-oplus-vibration-presets",
+        "c-trust-boundaries",
+        "plan-device-test-matrix",
+        "src-stylo2-i-evidence-ledger"
+      ],
+      "basis": "Vendor specifications from the research inventory, plus the repository README. Extended on 2 Nov 2026 from stylo2/docs/I-evidence-ledger.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-windows-haptic-pen",
+      "type": "device",
+      "title": "Windows 11 haptic pen (device class)",
+      "vendor": "Microsoft",
+      "category": "Reference device",
+      "status": "verified",
+      "priority": "medium",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/haptic-pen-implementation-guide",
+      "links": [],
+      "summary": "Any pen built to Microsoft's haptic pen guide. It works with Windows' inbox drivers, with no vendor service in between.",
+      "details": [
+        "Connects with HID over Bluetooth using inbox drivers.",
+        "Must also meet the general Windows pen implementation guide."
+      ],
+      "tags": [
+        "windows",
+        "hid"
+      ],
+      "related": [
+        "if-windows-haptic-pen-device",
+        "if-windows-pen-haptics-api"
+      ],
+      "basis": "Microsoft Haptic Pen Implementation Guide.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "dev-xiaomi-focus-pen-pro",
+      "type": "device",
+      "title": "Xiaomi Focus Pen Pro",
+      "vendor": "Xiaomi",
+      "category": "Haptic stylus",
+      "status": "unverified",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "Xiaomi's haptic stylus with squeeze and slide gestures, backed by the most complete public vendor SDK.",
+      "details": [
+        "Advertised: 16,384 pressure levels, integrated haptic motor, squeeze, double-press and slide gestures. Works with supported Xiaomi tablets (Pad 7, Pad 8).",
+        "Verified: it has a separate posture sensor, read through libssc in xiaomi-sheng-thp.",
+        "Verified: FocusPenProX was tested with it on a Pad 8 Pro (25091RP04C)."
+      ],
+      "tags": [
+        "gestures",
+        "posture-sensor"
+      ],
+      "related": [
+        "if-xiaomi-pen-engine",
+        "src-xiaomi-sheng-thp",
+        "src-focuspenprox"
+      ],
+      "basis": "Vendor specifications plus the two project READMEs.",
+      "updated": "2026-11-02"
+    }
+  ]
+}

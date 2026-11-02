@@ -1,0 +1,975 @@
+<title>Stylus Haptics Research Database</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column. Header with a verification meter, a stack diagram, then a filterable index of records. */
+:root {
+  --bg: #F2F4F7;
+  --surface: #FFFFFF;
+  --panel: #E8ECF2;
+  --ink: #141922;
+  --muted: #566070;
+  --line: #D4DAE2;
+  --accent: #2747B8;
+  --haptic: #B0441C;
+  --ok: #1D7649;
+  --ok-bg: #E2F2E9;
+  --warn: #8A5E00;
+  --warn-bg: #F5ECD3;
+  --infer: #6544B0;
+  --infer-bg: #EDE7F8;
+  --gap: #AE2A20;
+  --gap-bg: #F8E3E0;
+  --focus: #2747B8;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1117; --surface: #161A22; --panel: #1B212B; --ink: #E5E9F0; --muted: #98A2B3; --line: #2A313D;
+    --accent: #8FA7FF; --haptic: #F08A5D;
+    --ok: #63CC94; --ok-bg: #14291E; --warn: #E2B44F; --warn-bg: #2A2312; --infer: #B9A0FF; --infer-bg: #221C33; --gap: #FF8E85; --gap-bg: #2E1715;
+    --focus: #8FA7FF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1117; --surface: #161A22; --panel: #1B212B; --ink: #E5E9F0; --muted: #98A2B3; --line: #2A313D;
+  --accent: #8FA7FF; --haptic: #F08A5D;
+  --ok: #63CC94; --ok-bg: #14291E; --warn: #E2B44F; --warn-bg: #2A2312; --infer: #B9A0FF; --infer-bg: #221C33; --gap: #FF8E85; --gap-bg: #2E1715;
+  --focus: #8FA7FF;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 36px 72px;
+  display: grid; gap: 48px;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+
+/* Header */
+.masthead { display: grid; gap: 18px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.wave { width: 64px; height: 14px; flex: none; }
+.wave path { fill: none; stroke: var(--haptic); stroke-width: 1.6; stroke-linecap: round; }
+h1 { font-family: var(--font-display); font-stretch: 115%; font-weight: 780; font-size: clamp(30px, 5.4vw, 48px); line-height: 1.04; letter-spacing: -0.01em; max-width: 18ch; }
+.lede { font-size: 17px; color: var(--muted); max-width: 64ch; }
+.lede strong { color: var(--ink); font-weight: 600; }
+
+.meter { display: grid; gap: 12px; padding-top: 6px; }
+.meter-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.meter-head h2 { font-family: var(--font-display); font-stretch: 105%; font-size: 15px; font-weight: 700; }
+.meter-total { font-family: var(--font-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 12px; border-radius: 3px; overflow: hidden; background: var(--panel); gap: 2px; }
+.bar span { display: block; min-width: 0; flex-basis: 0; transition: flex-grow 0.3s ease; }
+.legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.legend button {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 8px; align-items: baseline;
+  text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px 12px; color: var(--ink); font: inherit; cursor: pointer;
+}
+.legend button:hover { border-color: var(--muted); }
+.legend button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.legend .dot { width: 9px; height: 9px; border-radius: 2px; align-self: center; }
+.legend .lg-label { font-weight: 600; font-size: 14px; }
+.legend .lg-count { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.legend .lg-desc { grid-column: 2 / 4; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.c-verified { background: var(--ok); } .c-unverified { background: var(--warn); } .c-inferred { background: var(--infer); } .c-open { background: var(--gap); }
+
+/* Section headings */
+.section { display: grid; gap: 18px; }
+.section-head { display: grid; gap: 6px; }
+.section-head h2 { font-family: var(--font-display); font-stretch: 108%; font-weight: 740; font-size: clamp(22px, 3vw, 28px); line-height: 1.15; }
+.section-head p { color: var(--muted); max-width: 70ch; }
+
+/* Diagram */
+.figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.figure-scroll { overflow-x: auto; padding: 12px 8px 4px; }
+.diagram { display: block; width: 100%; min-width: 760px; height: auto; }
+.figure figcaption { border-top: 1px solid var(--line); padding: 12px 16px; font-size: 13px; color: var(--muted); display: flex; gap: 8px 18px; flex-wrap: wrap; align-items: center; }
+.key { display: inline-flex; align-items: center; gap: 6px; }
+.key i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; }
+.key .k-a { border-color: var(--accent); } .key .k-h { border-color: var(--haptic); } .key .k-m { border-color: var(--muted); border-top-style: dashed; }
+.dg-col { fill: var(--panel); stroke: var(--line); }
+.dg-node { fill: var(--surface); stroke: var(--line); }
+.dg-node.v { stroke: var(--haptic); stroke-width: 1.5; }
+.dg-node.d { stroke-dasharray: 3 3; }
+.dg-t { fill: var(--ink); font-family: var(--font-body); font-size: 13px; font-weight: 600; }
+.dg-s { fill: var(--muted); font-family: var(--font-mono); font-size: 10.5px; }
+.dg-h { fill: var(--ink); font-family: var(--font-display); font-size: 14px; font-weight: 750; }
+.dg-lane { fill: var(--muted); font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.08em; }
+.dg-note { fill: var(--muted); font-family: var(--font-body); font-size: 11.5px; }
+.dg-note.h { fill: var(--haptic); }
+.dg-note.a { fill: var(--accent); }
+.ln-a { stroke: var(--accent); stroke-width: 1.7; fill: none; }
+.ln-a.d { stroke-dasharray: 5 4; }
+.ln-h { stroke: var(--haptic); stroke-width: 1.7; fill: none; }
+.ln-m { stroke: var(--muted); stroke-width: 1.5; fill: none; stroke-dasharray: 4 4; }
+.mk-a { fill: var(--accent); } .mk-h { fill: var(--haptic); } .mk-m { fill: var(--muted); }
+.dg-x { stroke: var(--gap); stroke-width: 2; stroke-linecap: round; }
+
+.takeaways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.takeaway { display: grid; gap: 6px; align-content: start; min-width: 0; padding-top: 12px; border-top: 2px solid var(--ink); }
+.takeaway h3 { font-family: var(--font-display); font-stretch: 104%; font-weight: 700; font-size: 17px; line-height: 1.25; }
+.takeaway p { font-size: 14.5px; color: var(--muted); }
+.takeaway a { font-size: 13.5px; font-weight: 500; }
+
+/* Toolbar */
+.toolbar { display: grid; gap: 12px; }
+.search-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .field .lbl { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+input[type="search"], input[type="text"], input[type="url"], select, textarea {
+  font: inherit; font-size: 14.5px; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%; box-sizing: border-box;
+}
+textarea { resize: vertical; line-height: 1.45; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; border-color: transparent; }
+.search-row .q { flex: 1 1 280px; }
+.search-row .sel { flex: 0 1 170px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab {
+  font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; cursor: pointer; display: inline-flex; gap: 6px; align-items: baseline;
+}
+.tab:hover { border-color: var(--muted); }
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tab .n { font-family: var(--font-mono); font-size: 12px; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.result-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13.5px; color: var(--muted); }
+.result-line .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.note { font-size: 13.5px; color: var(--warn); background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; }
+
+.btn {
+  font: inherit; font-size: 13.5px; font-weight: 500; border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.btn.danger { color: var(--gap); border-color: var(--gap); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+.linkbtn { font: inherit; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Records */
+.list { display: grid; }
+.rec {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) 150px; gap: 4px 18px;
+  padding: 16px 0; border-top: 1px solid var(--line);
+}
+.rec:last-child { border-bottom: 1px solid var(--line); }
+.rec-code { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--muted); padding-top: 3px; }
+.rec[data-type="gap"] .rec-code { color: var(--gap); }
+.rec-main { min-width: 0; display: grid; gap: 4px; }
+.rec-title button {
+  font: inherit; font-family: var(--font-body); font-size: 16px; font-weight: 600; line-height: 1.35; color: var(--ink);
+  background: none; border: 0; padding: 0; text-align: left; cursor: pointer;
+}
+.rec-title button:hover { color: var(--accent); }
+.rec-title button::after { content: " +"; font-family: var(--font-mono); font-weight: 400; color: var(--muted); }
+.rec.is-open .rec-title button::after { content: " −"; }
+.rec-summary { color: var(--muted); font-size: 14.5px; max-width: 72ch; }
+.rec-meta { display: grid; gap: 4px; justify-items: start; align-content: start; font-size: 13px; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; border-radius: 4px; padding: 2px 8px; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: currentColor; }
+.pill.verified { color: var(--ok); background: var(--ok-bg); }
+.pill.unverified { color: var(--warn); background: var(--warn-bg); }
+.pill.inferred { color: var(--infer); background: var(--infer-bg); }
+.pill.open { color: var(--gap); background: var(--gap-bg); }
+.pri { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.pri-critical { color: var(--ink); font-weight: 500; }
+
+.detail { margin-top: 10px; display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+.detail-cat { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.detail ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.detail-list li { max-width: 80ch; overflow-wrap: anywhere; }
+.detail h4 { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.link-list { list-style: none; padding: 0 !important; }
+.link-list li { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+.link-list .host { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; gap: 6px; align-items: baseline; font-size: 13px; color: var(--ink); text-decoration: none;
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; background: var(--bg); cursor: pointer; font-family: var(--font-body);
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip .cc { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+.chip.tag { font-family: var(--font-mono); font-size: 12px; }
+.detail-foot { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.detail-foot .mono { color: var(--ink); }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13.5px; }
+.empty { padding: 28px 0; color: var(--muted); border-top: 1px solid var(--line); }
+
+/* Editor */
+.editor { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 14px; }
+.editor h3 { font-family: var(--font-display); font-stretch: 105%; font-size: 18px; font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.hint { font-size: 12px; color: var(--muted); }
+.form-error { color: var(--gap); font-size: 13.5px; }
+.editor-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.toast {
+  position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--bg); font-size: 14px; border-radius: 8px; padding: 8px 14px; z-index: 20;
+  max-width: calc(100% - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+}
+
+.foot { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
+
+@media (max-width: 860px) {
+  .takeaways { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .rec { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .rec-code { padding-top: 0; }
+  .rec-meta { grid-auto-flow: column; justify-content: start; align-items: center; gap: 10px; }
+  .grid2 { grid-template-columns: minmax(0, 1fr); }
+  .search-row .sel { flex: 1 1 140px; }
+  .lede { font-size: 16px; }
+}
+@media (max-width: 420px) {
+  .legend { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar span { transition: none; }
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">
+      <svg class="wave" viewBox="0 0 64 14" aria-hidden="true"><path d="M1 7 Q4 1 7 7 T13 7 T19 7 T25 7 T31 7 Q33 4 35 7 T39 7 T43 7 Q44 6 45 7 T47 7 T49 7 L63 7"/></svg>
+      <span>Compiled 2 Nov 2026</span><span aria-hidden="true">·</span><span>OnePlus Stylo 2 and other haptic pens</span>
+    </div>
+    <h1>Stylus Haptics Research Database</h1>
+    <p class="lede">Sources, devices, interfaces and open questions about making a stylus's own motor vibrate from an Android app. <strong>Every record says how well it has been checked.</strong> Open a record to see its details, links and related entries.</p>
+
+    <section class="meter" aria-labelledby="meter-title">
+      <div class="meter-head">
+        <h2 id="meter-title">How much is verified</h2>
+        <span class="meter-total" id="meter-total">Loading…</span>
+      </div>
+      <div class="bar" id="bar" role="img" aria-label="Share of records by verification status"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+  </header>
+
+  <section class="section" aria-labelledby="stack-title">
+    <div class="section-head">
+      <h2 id="stack-title">How the pieces connect</h2>
+      <p>A OnePlus Pad 3 with the Stylo 2. Pen input reaches apps through standard Android. Haptic commands travel a separate route through OnePlus's own service.</p>
+    </div>
+    <figure class="figure">
+      <div class="figure-scroll">
+        <svg class="diagram" viewBox="0 0 980 420" role="img" aria-labelledby="dg-title dg-desc">
+          <title id="dg-title">How a haptic stylus connects to an Android app</title>
+          <desc id="dg-desc">Four lanes run between the stylus and the app. Input goes from the pen tip through the touch controller, kernel driver and InputReader to the app as a MotionEvent. A Bluetooth LE link carries pressure and buttons into InputReader and carries haptic commands from the vendor service to the pen's motor. The app reaches the vendor service through Binder. Android's own vibrator API ends at the tablet's motor and never reaches the pen.</desc>
+          <defs>
+            <marker id="ah-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-a"/></marker>
+            <marker id="ah-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-h"/></marker>
+            <marker id="ah-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-m"/></marker>
+          </defs>
+
+          <!-- End columns -->
+          <rect class="dg-col" x="16" y="20" width="124" height="380" rx="14"/>
+          <text class="dg-h" x="78" y="46" text-anchor="middle">Stylus</text>
+          <rect class="dg-col" x="830" y="20" width="134" height="380" rx="14"/>
+          <text class="dg-h" x="897" y="46" text-anchor="middle">App</text>
+
+          <!-- Pen parts -->
+          <rect class="dg-node" x="28" y="70" width="100" height="40" rx="6"/>
+          <text class="dg-t" x="78" y="95" text-anchor="middle">Tip electrode</text>
+          <rect class="dg-node" x="28" y="160" width="100" height="40" rx="6"/>
+          <text class="dg-t" x="78" y="185" text-anchor="middle">BLE radio</text>
+          <rect class="dg-node v" x="28" y="250" width="100" height="40" rx="6"/>
+          <text class="dg-t" x="78" y="275" text-anchor="middle">Linear motor</text>
+          <line class="ln-h" x1="78" y1="200" x2="78" y2="248" marker-end="url(#ah-h)"/>
+
+          <!-- App parts -->
+          <rect class="dg-node" x="842" y="70" width="110" height="40" rx="6"/>
+          <text class="dg-t" x="897" y="87" text-anchor="middle">Canvas</text>
+          <text class="dg-s" x="897" y="102" text-anchor="middle">MotionEvent</text>
+          <rect class="dg-node v" x="842" y="250" width="110" height="40" rx="6"/>
+          <text class="dg-t" x="897" y="267" text-anchor="middle">Pen haptics</text>
+          <text class="dg-s" x="897" y="282" text-anchor="middle">bindService</text>
+          <rect class="dg-node" x="842" y="340" width="110" height="40" rx="6"/>
+          <text class="dg-t" x="897" y="357" text-anchor="middle">Tablet haptics</text>
+          <text class="dg-s" x="897" y="372" text-anchor="middle">Vibrator</text>
+
+          <!-- Lane captions -->
+          <text class="dg-lane" x="390" y="58">INPUT · STANDARD ANDROID</text>
+          <text class="dg-lane" x="390" y="148">SIDE CHANNEL · BLUETOOTH LE</text>
+          <text class="dg-lane" x="390" y="238">PEN HAPTICS · VENDOR SERVICE</text>
+          <text class="dg-lane" x="390" y="328">TABLET HAPTICS · STANDARD ANDROID</text>
+
+          <!-- Row A: input -->
+          <rect class="dg-node" x="180" y="66" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="265" y="86" text-anchor="middle">Touch controller</text>
+          <text class="dg-s" x="265" y="102" text-anchor="middle">senses the tip</text>
+          <rect class="dg-node" x="390" y="66" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="475" y="86" text-anchor="middle">Kernel driver</text>
+          <text class="dg-s" x="475" y="102" text-anchor="middle">/dev/input/eventN</text>
+          <rect class="dg-node" x="600" y="66" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="685" y="86" text-anchor="middle">InputReader</text>
+          <text class="dg-s" x="685" y="102" text-anchor="middle">→ InputDispatcher</text>
+          <line class="ln-a d" x1="128" y1="90" x2="178" y2="90" marker-end="url(#ah-a)"/>
+          <line class="ln-a" x1="350" y1="90" x2="388" y2="90" marker-end="url(#ah-a)"/>
+          <line class="ln-a" x1="560" y1="90" x2="598" y2="90" marker-end="url(#ah-a)"/>
+          <line class="ln-a" x1="770" y1="90" x2="840" y2="90" marker-end="url(#ah-a)"/>
+
+          <!-- Row B: Bluetooth LE -->
+          <rect class="dg-node" x="180" y="156" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="265" y="176" text-anchor="middle">Bluetooth LE link</text>
+          <text class="dg-s" x="265" y="192" text-anchor="middle">held by the system</text>
+          <line class="ln-a" x1="128" y1="173" x2="178" y2="173" marker-end="url(#ah-a)"/>
+          <line class="ln-h" x1="180" y1="187" x2="130" y2="187" marker-end="url(#ah-h)"/>
+          <path class="ln-a" d="M350 180 H685 V116" marker-end="url(#ah-a)"/>
+          <text class="dg-note a" x="372" y="198">pressure, buttons over Bluetooth HID, merged with touch</text>
+
+          <!-- Row C: vendor haptics -->
+          <rect class="dg-node v" x="390" y="246" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="475" y="266" text-anchor="middle">Vendor service</text>
+          <text class="dg-s" x="475" y="282" text-anchor="middle">com.oplus.ipemanager</text>
+          <rect class="dg-node v" x="600" y="246" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="685" y="266" text-anchor="middle">Binder · AIDL</text>
+          <text class="dg-s" x="685" y="282" text-anchor="middle">ISdkAidlInterface</text>
+          <line class="ln-h" x1="842" y1="270" x2="772" y2="270" marker-end="url(#ah-h)"/>
+          <line class="ln-h" x1="600" y1="270" x2="562" y2="270" marker-end="url(#ah-h)"/>
+          <path class="ln-h" d="M390 270 H300 V206" marker-end="url(#ah-h)"/>
+          <text class="dg-note h" x="292" y="244" text-anchor="end">haptic commands</text>
+
+          <!-- Row D: tablet haptics -->
+          <rect class="dg-node d" x="180" y="336" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="265" y="356" text-anchor="middle">Tablet's own motor</text>
+          <text class="dg-s" x="265" y="372" text-anchor="middle">inside the tablet</text>
+          <rect class="dg-node" x="390" y="336" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="475" y="356" text-anchor="middle">Vibrator HAL</text>
+          <text class="dg-s" x="475" y="372" text-anchor="middle">system service</text>
+          <rect class="dg-node" x="600" y="336" width="170" height="48" rx="8"/>
+          <text class="dg-t" x="685" y="356" text-anchor="middle">Vibrator API</text>
+          <text class="dg-s" x="685" y="372" text-anchor="middle">VibrationEffect</text>
+          <line class="ln-m" x1="842" y1="360" x2="772" y2="360" marker-end="url(#ah-m)"/>
+          <line class="ln-m" x1="600" y1="360" x2="562" y2="360" marker-end="url(#ah-m)"/>
+          <line class="ln-m" x1="390" y1="360" x2="352" y2="360" marker-end="url(#ah-m)"/>
+          <line class="ln-m" x1="180" y1="360" x2="158" y2="360"/>
+          <line class="dg-x" x1="146" y1="354" x2="156" y2="366"/>
+          <line class="dg-x" x1="156" y1="354" x2="146" y2="366"/>
+          <text class="dg-note" x="180" y="404">Stops at the tablet. No standard Android route reaches the pen's motor.</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="key"><i class="k-a"></i>Standard input</span>
+        <span class="key"><i class="k-h"></i>Vendor-specific haptics</span>
+        <span class="key"><i class="k-m"></i>Android's own haptics</span>
+        <span>Scroll sideways on narrow screens.</span>
+      </figcaption>
+    </figure>
+
+    <div class="takeaways">
+      <div class="takeaway">
+        <h3>Input is standard. Feedback is not.</h3>
+        <p>Position, pressure and tilt reach every app as a MotionEvent. Android has no standard route from an app to a pen's motor.</p>
+        <a href="#c-android-haptics-path" data-go="c-android-haptics-path">Where Android haptics go</a>
+      </div>
+      <div class="takeaway">
+        <h3>A system service holds the pen link.</h3>
+        <p>On the Pad 3, com.oplus.ipemanager owns the Bluetooth connection. Apps bind to it through Binder, and they need a permission ordinary apps can't hold.</p>
+        <a href="#c-vendor-service-pattern" data-go="c-vendor-service-pattern">The vendor-service pattern</a>
+      </div>
+      <div class="takeaway">
+        <h3>The pen plays the texture itself.</h3>
+        <p>An app picks a tool texture and turns feedback on or off. The pen vibrates while the tip touches the glass. Windows uses the same model with standard HID waveforms.</p>
+        <a href="#c-feedback-models" data-go="c-feedback-models">Continuous textures and discrete events</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="db-title">
+    <div class="section-head">
+      <h2 id="db-title">Records</h2>
+      <p>Search everything, or narrow by type, vendor and status. Related entries link to each other.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-row">
+        <div class="field q">
+          <label for="q">Search</label>
+          <input type="search" id="q" placeholder="Try setVibrationType, 0x100B, Bluetooth, Xiaomi…" autocomplete="off">
+        </div>
+        <div class="field sel">
+          <label for="vendor">Vendor</label>
+          <select id="vendor"><option value="all">All vendors</option></select>
+        </div>
+        <div class="field sel">
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="all">Any status</option>
+            <option value="verified">Verified</option>
+            <option value="unverified">Unverified</option>
+            <option value="inferred">Inferred</option>
+            <option value="open">Open</option>
+          </select>
+        </div>
+        <div class="field sel">
+          <label for="sort">Sort by</label>
+          <select id="sort">
+            <option value="priority">Priority</option>
+            <option value="type">Type</option>
+            <option value="title">Title</option>
+          </select>
+        </div>
+      </div>
+      <div class="tabs" id="tabs" role="group" aria-label="Record type"></div>
+      <div class="result-line">
+        <span id="count" aria-live="polite"></span>
+        <span class="actions">
+          <button type="button" class="btn" id="clear" hidden>Clear filters</button>
+          <button type="button" class="btn" id="expand">Expand all</button>
+          <button type="button" class="btn primary" id="add" hidden>Add record</button>
+        </span>
+      </div>
+      <p class="note" id="note" hidden></p>
+    </div>
+
+    <div id="editor"></div>
+    <div class="list" id="list"><p class="empty">Loading records…</p></div>
+  </section>
+
+  <footer class="foot">
+    <span>Records live in this page's database. The source copy is kept in the repository under research/data/, one file per record type, with research/tools/validate.py to check it.</span>
+    <span>Status meanings: verified means checked against a primary source on 2 Nov 2026; unverified means not yet checked; inferred means a reasoned hypothesis; open means unknown.</span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var TYPES = [
+    ["source", "Sources", "SRC"], ["device", "Devices", "DEV"], ["interface", "Interfaces", "IF"],
+    ["concept", "Concepts", "CON"], ["plan", "Plans", "PLAN"], ["gap", "Open questions", "GAP"]
+  ];
+  var TYPE = {}; var TYPE_ORDER = {};
+  TYPES.forEach(function (t, i) { TYPE[t[0]] = { label: t[1], code: t[2] }; TYPE_ORDER[t[0]] = i; });
+  var STATUSES = [
+    ["verified", "Verified", "Checked against official docs, a project's own page or this repo's code."],
+    ["unverified", "Unverified", "From the research notes, vendor specs or community posts. Not yet checked."],
+    ["inferred", "Inferred", "Drawn from verified facts. A working hypothesis."],
+    ["open", "Open", "Unknown. A question to answer."]
+  ];
+  var STATUS = {}; STATUSES.forEach(function (s) { STATUS[s[0]] = { label: s[1], desc: s[2] }; });
+  var PRI = { critical: 0, high: 1, medium: 2, low: 3 };
+  var ID_RE = /^[a-z0-9][a-z0-9-]{1,79}$/;
+
+  var state = {
+    records: [], byId: new Map(), loaded: false, confirmed: false, note: "",
+    q: "", type: "all", vendor: "all", status: "all", sort: "priority",
+    open: new Set(), canEdit: false, editing: null, confirmDelete: null, busy: false
+  };
+  var col = null;
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function $(id) { return document.getElementById(id); }
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        var v = attrs[k];
+        if (v == null || v === false) return;
+        if (k === "class") el.className = v;
+        else if (k === "text") el.textContent = v;
+        else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v === true ? "" : String(v));
+      });
+    }
+    for (var i = 2; i < arguments.length; i++) append(el, arguments[i]);
+    return el;
+  }
+  function append(el, kid) {
+    if (kid == null || kid === false) return;
+    if (Array.isArray(kid)) { kid.forEach(function (k) { append(el, k); }); return; }
+    el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  function str(v) { return typeof v === "string" ? v : ""; }
+  function arr(v) { return Array.isArray(v) ? v : []; }
+  function safeUrl(u) {
+    try { var x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : null; }
+    catch (e) { return null; }
+  }
+  function hostOf(u) { try { return new URL(u).host.replace(/^www\./, ""); } catch (e) { return ""; } }
+
+  function norm(id, d) {
+    d = d || {};
+    return {
+      id: id,
+      type: TYPE[d.type] ? d.type : "source",
+      title: str(d.title) || id,
+      vendor: str(d.vendor) || "Unspecified",
+      category: str(d.category),
+      status: STATUS[d.status] ? d.status : "unverified",
+      priority: PRI[d.priority] != null ? d.priority : "medium",
+      url: str(d.url),
+      links: arr(d.links).filter(function (l) { return l && typeof l === "object"; })
+        .map(function (l) { return { label: str(l.label), url: str(l.url) }; }),
+      summary: str(d.summary),
+      details: arr(d.details).filter(function (x) { return typeof x === "string"; }),
+      tags: arr(d.tags).filter(function (x) { return typeof x === "string"; }),
+      related: arr(d.related).filter(function (x) { return typeof x === "string"; }),
+      basis: str(d.basis),
+      updated: str(d.updated)
+    };
+  }
+
+  /* Preferences (per viewer, optional) */
+  function readPrefs() {
+    try {
+      var p = JSON.parse(localStorage.getItem("shrdb.prefs") || "{}");
+      if (p.sort && ["priority", "type", "title"].indexOf(p.sort) >= 0) state.sort = p.sort;
+      if (p.type && (p.type === "all" || TYPE[p.type])) state.type = p.type;
+    } catch (e) { /* storage unavailable */ }
+  }
+  function writePrefs() {
+    try { localStorage.setItem("shrdb.prefs", JSON.stringify({ sort: state.sort, type: state.type })); } catch (e) { /* ignore */ }
+  }
+
+  /* Filtering */
+  function matches(r, ignoreType) {
+    if (!ignoreType && state.type !== "all" && r.type !== state.type) return false;
+    if (state.vendor !== "all" && r.vendor !== state.vendor) return false;
+    if (state.status !== "all" && r.status !== state.status) return false;
+    if (state.q) {
+      var hay = [r.id, r.title, r.vendor, r.category, r.summary, r.details.join(" "), r.tags.join(" "), r.basis,
+        r.links.map(function (l) { return l.label; }).join(" ")].join(" ").toLowerCase();
+      var terms = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+      for (var i = 0; i < terms.length; i++) if (hay.indexOf(terms[i]) < 0) return false;
+    }
+    return true;
+  }
+  function filtersActive() { return state.q || state.type !== "all" || state.vendor !== "all" || state.status !== "all"; }
+  function sorter(a, b) {
+    var t = (TYPE_ORDER[a.type] - TYPE_ORDER[b.type]);
+    var p = (PRI[a.priority] - PRI[b.priority]);
+    if (state.sort === "title") return a.title.localeCompare(b.title);
+    if (state.sort === "type") return t || p || a.title.localeCompare(b.title);
+    return p || t || a.title.localeCompare(b.title);
+  }
+  function clearFilters() {
+    state.q = ""; state.type = "all"; state.vendor = "all"; state.status = "all";
+    $("q").value = ""; writePrefs();
+  }
+
+  /* Rendering */
+  function render() { renderMeter(); renderTabs(); renderVendors(); renderList(); syncControls(); }
+
+  function renderMeter() {
+    var total = state.records.length;
+    var counts = { verified: 0, unverified: 0, inferred: 0, open: 0 };
+    state.records.forEach(function (r) { counts[r.status]++; });
+    $("meter-total").textContent = state.loaded
+      ? (total + " records · " + (total ? Math.round(counts.verified / total * 100) : 0) + "% verified")
+      : "Loading…";
+    var bar = $("bar"); bar.replaceChildren();
+    STATUSES.forEach(function (s) {
+      if (!counts[s[0]]) return;
+      bar.append(h("span", { class: "c-" + s[0], style: "flex-grow:" + counts[s[0]], title: s[1] + ": " + counts[s[0]] }));
+    });
+    var legend = $("legend"); legend.replaceChildren();
+    STATUSES.forEach(function (s) {
+      legend.append(h("button", {
+        type: "button", "aria-pressed": String(state.status === s[0]),
+        onclick: function () { state.status = state.status === s[0] ? "all" : s[0]; render(); }
+      },
+        h("span", { class: "dot c-" + s[0] }),
+        h("span", { class: "lg-label" }, s[1]),
+        h("span", { class: "lg-count" }, String(counts[s[0]])),
+        h("span", { class: "lg-desc" }, s[2])
+      ));
+    });
+  }
+
+  function renderTabs() {
+    var tabs = $("tabs"); tabs.replaceChildren();
+    var pool = state.records.filter(function (r) { return matches(r, true); });
+    var counts = {}; pool.forEach(function (r) { counts[r.type] = (counts[r.type] || 0) + 1; });
+    var all = [["all", "All", pool.length]].concat(TYPES.map(function (t) { return [t[0], t[1], counts[t[0]] || 0]; }));
+    all.forEach(function (t) {
+      tabs.append(h("button", {
+        type: "button", class: "tab", "aria-pressed": String(state.type === t[0]),
+        onclick: function () { state.type = t[0]; writePrefs(); render(); }
+      }, t[1], h("span", { class: "n" }, String(t[2]))));
+    });
+  }
+
+  function renderVendors() {
+    var sel = $("vendor");
+    var vendors = Array.from(new Set(state.records.map(function (r) { return r.vendor; }))).sort();
+    if (state.vendor !== "all" && vendors.indexOf(state.vendor) < 0) vendors.push(state.vendor);
+    sel.replaceChildren(h("option", { value: "all" }, "All vendors"));
+    vendors.forEach(function (v) { sel.append(h("option", { value: v }, v)); });
+    sel.value = state.vendor;
+    var dl = $("vendor-list");
+    if (dl) { dl.replaceChildren(); vendors.forEach(function (v) { dl.append(h("option", { value: v })); }); }
+  }
+
+  function syncControls() {
+    $("status").value = state.status;
+    $("sort").value = state.sort;
+    $("clear").hidden = !filtersActive();
+    $("add").hidden = !state.canEdit || !!state.editing;
+    var visible = state.records.filter(function (r) { return matches(r); });
+    var allOpen = visible.length > 0 && visible.every(function (r) { return state.open.has(r.id); });
+    $("expand").textContent = allOpen ? "Collapse all" : "Expand all";
+    $("expand").hidden = visible.length === 0;
+    var note = $("note"); note.hidden = !state.note || !state.records.length; note.textContent = state.note;
+  }
+
+  function statusPill(s) { return h("span", { class: "pill " + s }, STATUS[s].label); }
+
+  function renderList() {
+    var list = $("list"); list.replaceChildren();
+    if (!state.loaded) {
+      list.append(h("p", { class: "empty" }, state.note || "Loading records…"));
+      $("count").textContent = "";
+      return;
+    }
+    var rows = state.records.filter(function (r) { return matches(r); }).sort(sorter);
+    $("count").textContent = "Showing " + rows.length + " of " + state.records.length + " records";
+    if (!state.records.length) {
+      list.append(h("p", { class: "empty" }, state.note || (state.canEdit
+        ? "No records yet. Add the first one with Add record."
+        : "No records yet. Records appear here once an editor adds them.")));
+      return;
+    }
+    if (!rows.length) {
+      list.append(h("p", { class: "empty" }, "No records match these filters. ",
+        h("button", { type: "button", class: "linkbtn", onclick: function () { clearFilters(); render(); } }, "Clear filters")));
+      return;
+    }
+    rows.forEach(function (r) { list.append(renderRow(r)); });
+  }
+
+  function renderRow(r) {
+    var isOpen = state.open.has(r.id);
+    return h("article", { class: "rec" + (isOpen ? " is-open" : ""), id: "rec-" + r.id, "data-type": r.type },
+      h("div", { class: "rec-code", title: TYPE[r.type].label }, TYPE[r.type].code),
+      h("div", { class: "rec-main" },
+        h("h3", { class: "rec-title" },
+          h("button", { type: "button", "aria-expanded": String(isOpen), "aria-controls": "det-" + r.id,
+            onclick: function () { toggle(r.id); } }, r.title)),
+        r.summary ? h("p", { class: "rec-summary" }, r.summary) : null,
+        isOpen ? renderDetail(r) : null
+      ),
+      h("div", { class: "rec-meta" },
+        statusPill(r.status),
+        h("span", null, r.vendor),
+        h("span", { class: "pri pri-" + r.priority }, r.priority)
+      )
+    );
+  }
+
+  function renderDetail(r) {
+    var d = h("div", { class: "detail", id: "det-" + r.id });
+    if (r.category) d.append(h("p", { class: "detail-cat" }, r.category));
+    if (r.details.length) d.append(h("ul", { class: "detail-list" }, r.details.map(function (x) { return h("li", null, x); })));
+
+    var links = []; var seen = new Set();
+    r.links.forEach(function (l) {
+      var u = safeUrl(l.url); if (!u || seen.has(u)) return;
+      seen.add(u); links.push({ label: l.label || hostOf(u) || u, url: u });
+    });
+    var main = safeUrl(r.url);
+    if (main && !seen.has(main)) links.unshift({ label: "Main link", url: main });
+    if (links.length) {
+      d.append(h("div", null, h("h4", null, links.length === 1 ? "Link" : "Links"),
+        h("ul", { class: "link-list" }, links.map(function (l) {
+          return h("li", null, h("a", { href: l.url, target: "_blank", rel: "noopener noreferrer" }, l.label), h("span", { class: "host" }, hostOf(l.url)));
+        }))));
+    }
+
+    if (r.related.length) {
+      d.append(h("div", null, h("h4", null, "Related"),
+        h("div", { class: "chips" }, r.related.map(function (id) {
+          var t = state.byId.get(id);
+          if (!t) return h("span", { class: "chip tag" }, id);
+          return h("a", { class: "chip", href: "#" + id, onclick: function (e) { e.preventDefault(); go(id); } },
+            h("span", { class: "cc" }, TYPE[t.type].code), t.title);
+        }))));
+    }
+
+    if (r.tags.length) {
+      d.append(h("div", null, h("h4", null, "Tags"),
+        h("div", { class: "chips" }, r.tags.map(function (tag) {
+          return h("button", { type: "button", class: "chip tag", title: "Search for " + tag,
+            onclick: function () { state.q = tag; $("q").value = tag; state.type = "all"; render(); $("db-title").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }); } }, tag);
+        }))));
+    }
+
+    var foot = h("div", { class: "detail-foot" },
+      h("span", null, "ID ", h("span", { class: "mono" }, r.id)),
+      r.updated ? h("span", null, "Updated ", h("span", { class: "mono" }, r.updated)) : null,
+      r.basis ? h("span", null, "Basis: " + r.basis) : null
+    );
+    d.append(foot);
+
+    if (state.canEdit) {
+      var actions = h("div", { class: "detail-actions" });
+      if (state.confirmDelete === r.id) {
+        actions.append(h("span", null, "Delete this record for everyone?"),
+          h("button", { type: "button", class: "btn danger", disabled: state.busy, onclick: function () { removeRecord(r.id); } }, "Delete"),
+          h("button", { type: "button", class: "btn", onclick: function () { state.confirmDelete = null; renderList(); } }, "Keep"));
+      } else {
+        actions.append(
+          h("button", { type: "button", class: "btn", onclick: function () { openEditor({ mode: "edit", id: r.id }); } }, "Edit"),
+          h("button", { type: "button", class: "btn danger", onclick: function () { state.confirmDelete = r.id; renderList(); } }, "Delete…"));
+      }
+      d.append(actions);
+    }
+    return d;
+  }
+
+  function toggle(id) {
+    if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
+    if (state.confirmDelete === id) state.confirmDelete = null;
+    renderList(); syncControls();
+  }
+
+  function go(id) {
+    if (location.hash.slice(1) !== id) {
+      try { history.replaceState(null, "", "#" + id); } catch (e) { location.hash = id; }
+    }
+    reveal(id);
+  }
+  function reveal(id) {
+    var r = state.byId.get(id); if (!r) return;
+    if (!matches(r)) clearFilters();
+    state.open.add(id);
+    render();
+    requestAnimationFrame(function () {
+      var el = $("rec-" + id);
+      if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    });
+  }
+
+  /* Editor */
+  function field(id, label, control, hint) {
+    return h("div", { class: "field" }, h("label", { for: id }, label), control, hint ? h("span", { class: "hint" }, hint) : null);
+  }
+  function selectOf(id, options, value) {
+    var s = h("select", { id: id }, options.map(function (o) { return h("option", { value: o[0] }, o[1]); }));
+    s.value = value; return s;
+  }
+  function openEditor(mode) {
+    state.editing = mode; state.confirmDelete = null;
+    renderEditor(); syncControls();
+    var first = $(mode.mode === "new" ? "f-id" : "f-title");
+    if (first) { first.focus(); $("editor").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); }
+  }
+  function closeEditor() { state.editing = null; renderEditor(); syncControls(); }
+
+  function renderEditor() {
+    var box = $("editor"); box.replaceChildren();
+    if (!state.editing || !state.canEdit) return;
+    var isNew = state.editing.mode === "new";
+    var r = isNew ? norm("", { type: state.type !== "all" ? state.type : "source", status: "unverified", priority: "medium" })
+                  : state.byId.get(state.editing.id);
+    if (!r) { state.editing = null; return; }
+    var err = h("p", { class: "form-error", id: "form-error", role: "alert", hidden: true });
+    var form = h("form", { class: "editor", novalidate: true, onsubmit: save },
+      h("h3", null, isNew ? "Add a record" : "Edit record"),
+      h("div", { class: "grid2" },
+        field("f-id", "ID", h("input", { type: "text", id: "f-id", value: r.id, disabled: !isNew, required: true, spellcheck: "false", autocomplete: "off" }),
+          isNew ? "Lowercase letters, digits and hyphens, e.g. src-new-paper." : "IDs can't be changed."),
+        field("f-title", "Title", h("input", { type: "text", id: "f-title", value: r.title === r.id ? "" : r.title, required: true }))
+      ),
+      h("div", { class: "grid4" },
+        field("f-type", "Type", selectOf("f-type", TYPES.map(function (t) { return [t[0], t[1]]; }), r.type)),
+        field("f-status", "Status", selectOf("f-status", STATUSES.map(function (s) { return [s[0], s[1]]; }), r.status)),
+        field("f-priority", "Priority", selectOf("f-priority", [["critical", "Critical"], ["high", "High"], ["medium", "Medium"], ["low", "Low"]], r.priority)),
+        field("f-vendor", "Vendor", h("input", { type: "text", id: "f-vendor", list: "vendor-list", value: r.vendor === "Unspecified" ? "" : r.vendor }))
+      ),
+      h("div", { class: "grid2" },
+        field("f-category", "Category", h("input", { type: "text", id: "f-category", value: r.category })),
+        field("f-url", "Main link", h("input", { type: "url", id: "f-url", value: r.url, placeholder: "https://…" }))
+      ),
+      field("f-summary", "Summary", h("textarea", { id: "f-summary", rows: "2" }, r.summary)),
+      field("f-details", "Details", h("textarea", { id: "f-details", rows: "6" }, r.details.join("\n")), "One point per line."),
+      field("f-links", "More links", h("textarea", { id: "f-links", rows: "3" }, r.links.map(function (l) { return (l.label ? l.label + " | " : "") + l.url; }).join("\n")), "One per line: Label | https://…"),
+      h("div", { class: "grid2" },
+        field("f-tags", "Tags", h("input", { type: "text", id: "f-tags", value: r.tags.join(", ") }), "Comma-separated."),
+        field("f-related", "Related record IDs", h("input", { type: "text", id: "f-related", value: r.related.join(", "), spellcheck: "false" }), "Comma-separated IDs.")
+      ),
+      field("f-basis", "Basis", h("input", { type: "text", id: "f-basis", value: r.basis }), "Where this came from and when it was checked."),
+      err,
+      h("div", { class: "editor-actions" },
+        h("button", { type: "submit", class: "btn primary", id: "f-save" }, isNew ? "Add record" : "Save changes"),
+        h("button", { type: "button", class: "btn", onclick: closeEditor }, "Cancel"))
+    );
+    box.append(h("datalist", { id: "vendor-list" }), form);
+    renderVendors();
+  }
+
+  function formError(msg) { var e = $("form-error"); if (e) { e.textContent = msg; e.hidden = false; } }
+  function val(id) { var el = $(id); return el ? el.value.trim() : ""; }
+  function splitList(s) { return s.split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
+
+  function save(e) {
+    e.preventDefault();
+    if (!col || state.busy) return;
+    var isNew = state.editing.mode === "new";
+    var id = isNew ? val("f-id") : state.editing.id;
+    if (!ID_RE.test(id)) return formError("Use 2 to 80 lowercase letters, digits or hyphens for the ID, starting with a letter or digit.");
+    if (isNew && state.byId.has(id)) return formError("A record with this ID already exists. Choose another ID, or edit that record.");
+    var title = val("f-title");
+    if (!title) return formError("Add a title.");
+    var url = val("f-url");
+    if (url && !safeUrl(url)) return formError("The main link must start with https:// or http://.");
+    var links = [];
+    var badLink = false;
+    val("f-links").split("\n").map(function (x) { return x.trim(); }).filter(Boolean).forEach(function (line) {
+      var i = line.lastIndexOf("|");
+      var label = i >= 0 ? line.slice(0, i).trim() : "";
+      var u = (i >= 0 ? line.slice(i + 1) : line).trim();
+      if (!safeUrl(u)) badLink = true; else links.push({ label: label, url: u });
+    });
+    if (badLink) return formError("Each extra link needs a web address starting with https:// or http://.");
+    var related = splitList(val("f-related")).filter(function (x) { return x !== id; });
+    var doc = {
+      type: $("f-type").value, title: title, vendor: val("f-vendor") || "Unspecified", category: val("f-category"),
+      status: $("f-status").value, priority: $("f-priority").value, url: url, links: links,
+      summary: val("f-summary"),
+      details: val("f-details").split("\n").map(function (x) { return x.trim(); }).filter(Boolean),
+      tags: splitList(val("f-tags")), related: related, basis: val("f-basis"),
+      updated: new Date().toISOString().slice(0, 10)
+    };
+    state.busy = true; $("f-save").disabled = true;
+    col.doc(id).set(doc).then(function () {
+      state.busy = false; state.editing = null; renderEditor();
+      toast(isNew ? "Record added" : "Changes saved");
+      go(id);
+    }, function (err) {
+      state.busy = false; var b = $("f-save"); if (b) b.disabled = false;
+      formError(writeError(err));
+    });
+  }
+
+  function removeRecord(id) {
+    if (!col || state.busy) return;
+    state.busy = true; renderList();
+    col.doc(id).delete().then(function () {
+      state.busy = false; state.confirmDelete = null; state.open.delete(id);
+      toast("Record deleted"); render();
+    }, function (err) {
+      state.busy = false; state.confirmDelete = null; render();
+      toast(writeError(err));
+    });
+  }
+
+  function writeError(err) {
+    var code = err && err.code;
+    if (code === "invalid_argument") return "The database refused this change. You may not have edit access, or a field is too long.";
+    if (code === "quota_exceeded") return "The database is full. Delete some records first.";
+    if (code === "resource_exhausted") return "Too many changes at once. Wait a moment, then try again.";
+    if (code === "revoked") return "Access to this database has ended for this visit.";
+    return "Couldn't save the change. Try again in a moment.";
+  }
+
+  var toastTimer = 0;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 2800);
+  }
+
+  /* Wiring */
+  function bind() {
+    $("q").addEventListener("input", function (e) { state.q = e.target.value.trim(); render(); });
+    $("vendor").addEventListener("change", function (e) { state.vendor = e.target.value; render(); });
+    $("status").addEventListener("change", function (e) { state.status = e.target.value; render(); });
+    $("sort").addEventListener("change", function (e) { state.sort = e.target.value; writePrefs(); render(); });
+    $("clear").addEventListener("click", function () { clearFilters(); render(); });
+    $("expand").addEventListener("click", function () {
+      var visible = state.records.filter(function (r) { return matches(r); });
+      var allOpen = visible.every(function (r) { return state.open.has(r.id); });
+      visible.forEach(function (r) { if (allOpen) state.open.delete(r.id); else state.open.add(r.id); });
+      render();
+    });
+    $("add").addEventListener("click", function () { openEditor({ mode: "new" }); });
+    document.querySelectorAll("[data-go]").forEach(function (a) {
+      a.addEventListener("click", function (e) { e.preventDefault(); go(a.getAttribute("data-go")); });
+    });
+    window.addEventListener("hashchange", function () { var id = location.hash.slice(1); if (id) reveal(id); });
+  }
+
+  var hashApplied = false;
+  function onRecords(snap) {
+    var list = [];
+    snap.docs.forEach(function (d) { if (d.exists) list.push(norm(d.id, d.data())); });
+    state.records = list;
+    state.byId = new Map(list.map(function (r) { return [r.id, r]; }));
+    state.loaded = true;
+    if (!snap.metadata.fromCache) { state.confirmed = true; state.note = ""; clearTimeout(loadTimer); }
+    if (state.editing && state.editing.mode === "edit" && !state.byId.has(state.editing.id)) { state.editing = null; renderEditor(); }
+    render();
+    if (!hashApplied && list.length) {
+      hashApplied = true;
+      var id = location.hash.slice(1);
+      if (id && state.byId.has(id)) reveal(id);
+    }
+  }
+
+  var loadTimer = 0;
+  function boot() {
+    readPrefs(); bind(); render();
+    var c = window.claude;
+    if (!c || typeof c.use !== "function") {
+      state.loaded = true;
+      state.note = "This page loads its records from claude.ai. Open it there while signed in.";
+      render(); return;
+    }
+    Promise.all([
+      c.use("db").catch(function () { return null; }),
+      c.use("user").catch(function () { return null; })
+    ]).then(function (res) {
+      var dbNs = res[0], userNs = res[1];
+      var editCheck = userNs ? userNs.canEdit().catch(function () { return false; }) : Promise.resolve(false);
+      editCheck.then(function (ok) { state.canEdit = !!ok; renderEditor(); render(); });
+      if (!dbNs) {
+        state.loaded = true;
+        state.note = "The records can't load in this view. Open the page on claude.ai while signed in.";
+        render(); return;
+      }
+      col = dbNs.collection("records");
+      loadTimer = setTimeout(function () {
+        if (state.confirmed) return;
+        state.note = state.records.length
+          ? "Couldn't confirm the latest records yet. What you see may be out of date."
+          : "Can't reach the database yet. The page keeps trying; check your connection.";
+        if (!state.records.length) state.loaded = true;
+        render();
+      }, 10000);
+      col.onSnapshot(onRecords, function (err) {
+        clearTimeout(loadTimer);
+        state.loaded = true;
+        state.note = (err && err.code === "revoked")
+          ? "Access to these records has ended for this visit."
+          : "The records stopped updating. Reload the page to reconnect.";
+        render();
+      });
+    });
+  }
+
+  boot();
+})();
+</script>

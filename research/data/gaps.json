@@ -1,0 +1,766 @@
+{
+  "type": "gap",
+  "records": [
+    {
+      "id": "gap-aidl-matches-firmware",
+      "type": "gap",
+      "title": "Does the reconstructed AIDL match the installed com.oplus.ipemanager?",
+      "vendor": "OnePlus",
+      "category": "Interface",
+      "status": "open",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "The descriptor, 12 transaction codes and 4 callbacks come from a community reconstruction. They have not been compared with the installed service.",
+      "details": [
+        "Known from code: the repository files are marked as cleaned reconstructions.",
+        "The route docs label every row of the interface reported until this is checked. The interface records in this database say verified because they match the repository's code, not a device.",
+        "Also unknown: whether the real interface has intensity, duration or waveform parameters, whether getSupportFeatureList has a transaction, and what the other calls mean (gap-oneplus-feature-semantics).",
+        "Owner decision, 2 Nov 2026: decompiling is allowed for this one check, on the copy of com.oplus.ipemanager pulled from the owner's own tablet. Only the pen-SDK interface classes are examined, the APK and decompiled output stay in research/local/, and only the descriptor, method names, transaction codes and signatures are recorded (CLAUDE.md). No mirror download is used.",
+        "Next step: pull the APK with the apk step of research/tools/pad3_readout.py (it records the version and SHA-256), decompile only ISdkAidlInterface and ISDKAidlCallback with JADX, then run research/tools/aidl_check.py on the output (PICKUP.md Step 2b).",
+        "Read-only cross-check: the PoC log prints the binder's interface descriptor at bind. A different descriptor is a finding; do not change the code to match.",
+        "Record: APK version and SHA-256, the aidl_check.py result (match, renumbered, signature differs, missing or extra, per method), and the descriptor seen at bind. The owner reviews any difference before the app's codes change."
+      ],
+      "tags": [
+        "aidl",
+        "descriptor",
+        "firmware-version",
+        "ledger-q10"
+      ],
+      "related": [
+        "if-oplus-sdk-interface",
+        "if-oplus-callback",
+        "if-oplus-vibration-presets",
+        "gap-oneplus-feature-semantics",
+        "plan-pad3-readout",
+        "plan-route-a-poc-run",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-c-protocol",
+        "src-stylo2-a-reconnaissance",
+        "src-project-rules",
+        "src-apkmirror-smart-accessories"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q10) on 2 Nov 2026; not checked on a device. The block on the experiment is from CLAUDE.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-android-hid-haptics",
+      "type": "gap",
+      "title": "Would Android drive a standard HID haptic pen?",
+      "vendor": "Android",
+      "category": "Platform",
+      "status": "open",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "No Android API was found that sends HID Haptics page (0x0E) commands to a stylus. Whether Linux or Android route them at all is unknown.",
+      "details": [
+        "If they did, a pen built to the Windows guide could work on Android without a vendor service.",
+        "Next step: check AOSP inputflinger and the Linux HID subsystem for Haptics page support."
+      ],
+      "tags": [
+        "hid",
+        "aosp",
+        "linux"
+      ],
+      "related": [
+        "c-android-haptics-path",
+        "if-hid-haptics-page",
+        "if-android-inputdevice"
+      ],
+      "basis": "No source found on 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-caller-validation-after-bind",
+      "type": "gap",
+      "title": "If an app can bind, does the service accept its calls?",
+      "vendor": "OnePlus",
+      "category": "Access",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "The service may check the caller's UID, package or signature after a bind succeeds. Whether it does is unknown.",
+      "details": [
+        "Reported, unconfirmed: a contributor suspects the client class PencilManagerUnitClient checks the calling app's package signature (src-revanced-180). If true, access depends on which app calls.",
+        "Reported, not checked: approved third-party apps authenticate per app through a OnePlus developer SDK (if-oneplus-partner-sdk).",
+        "Why it matters: it separates B2 (caller validation inside the service) from B1 (the Android permission), and B2 from B4 (the protocol).",
+        "Only reachable if the bind in gap-service-discovery-and-bind succeeds.",
+        "Next step: run step 3 of the isolating experiment: with the binder in hand, call a harmless query such as getPencilConnectState and see whether it returns or throws SecurityException or an auth error. The Route A PoC does this as its AUTHZ line.",
+        "Record: the call, the return value or the exact exception, its message and the layer."
+      ],
+      "tags": [
+        "caller-validation",
+        "b2",
+        "authorization",
+        "ledger-q3"
+      ],
+      "related": [
+        "plan-trust-boundary-isolation",
+        "plan-route-a-poc-run",
+        "c-trust-boundaries",
+        "src-revanced-180",
+        "if-oplus-pencilmanagerunitclient",
+        "if-oneplus-partner-sdk",
+        "gap-service-discovery-and-bind",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-h-trust-boundaries",
+        "gap-unprivileged-execution",
+        "if-oplus-ipemanager"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q3) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-captured-write-buzzes-pen",
+      "type": "gap",
+      "title": "Does writing a captured value to the candidate characteristic make the pen buzz?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "The go or no-go for direct BLE: whether an ordinary app writing bytes copied from Notes' own traffic makes the pen vibrate.",
+      "details": [
+        "Needs a captured value from gap-haptic-command-bytes and a candidate characteristic from gap-second-gatt-client-access. Do it only after gap-second-gatt-client-disruption shows a second connection is safe.",
+        "Write only bytes captured from Notes on this device. No fuzzing. BLE writes change hardware state, so ask the owner first.",
+        "If it works, the direct-BLE route is real: fill Stylo2GattProfile, write a Kotlin GattTransport, and set Availability.ble_protocol_verified.",
+        "Next step: with the inspector, write the bytes captured in the J scenarios to the candidate characteristic (plan-ble-independent-access-test, step 5).",
+        "Record: the characteristic, the bytes, with or without response, whether the pen vibrated, and any error."
+      ],
+      "tags": [
+        "direct-ble",
+        "write",
+        "go-no-go",
+        "ledger-q9"
+      ],
+      "related": [
+        "plan-ble-independent-access-test",
+        "plan-device-test-matrix",
+        "gap-haptic-command-bytes",
+        "gap-second-gatt-client-access",
+        "gap-second-gatt-client-disruption",
+        "c-trust-boundaries",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-j-capture-plan",
+        "src-project-rules"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q9) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-haptic-command-bytes",
+      "type": "gap",
+      "title": "What are the exact bytes for each profile, start and stop?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "No packet format is known for set-profile, start or stop. The docs deliberately invent none.",
+      "details": [
+        "Known: nothing. No UUIDs, handles or encodings are recorded anywhere, on purpose.",
+        "Only meaningful if gap-haptic-over-gatt shows a GATT write.",
+        "The reconstructed interface has no intensity, duration, frequency or waveform parameter. Richer framing in the snoop would show otherwise (C, part 3).",
+        "Feeds: stylo2_ble::Stylo2GattProfile.encode and stylo2-oplus::wire::reported_code.",
+        "Next step: snoop scenarios 2 to 7, correlating the markers with the ATT writes (plan-hci-snoop-capture).",
+        "Record: for each scenario the handle, the characteristic UUID if resolvable, the opcode, the payload hex and whether the pen vibrated. Redact Bluetooth addresses."
+      ],
+      "tags": [
+        "bytes",
+        "encoding",
+        "att",
+        "ledger-q5"
+      ],
+      "related": [
+        "plan-hci-snoop-capture",
+        "gap-haptic-over-gatt",
+        "gap-profile-integer-feel",
+        "gap-captured-write-buzzes-pen",
+        "c-trust-boundaries",
+        "if-oplus-sdk-interface",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-j-capture-plan",
+        "gap-oneplus-transport"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q5) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-haptic-over-gatt",
+      "type": "gap",
+      "title": "Is haptic control carried over GATT, or another channel?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "It is not known that the service reaches the pen's motor with a GATT write. The service name suggests it may use something else.",
+      "details": [
+        "Known from the README: the service talks to the pen over Bluetooth. The pen's Bluetooth LE address reaches the tablet over the charging link (c-pen-attach-handshake).",
+        "The service component is .btadsorb.CoreService. The guide reads adsorb as the magnetic attach and charge relationship, so the path may be another L2CAP channel or something the service brokers. That reading is from the name only.",
+        "Nothing shows that the pen exposes a writable haptic characteristic.",
+        "Why it matters: it picks between direct BLE and the other routes (B4).",
+        "Next step: HCI snoop of Notes, one pencil stroke plus start and stop; see whether ATT writes line up with vibration (plan-hci-snoop-capture). Ask the owner first, because turning on the snoop log is a settings change.",
+        "Absence of a packet does not prove absence of a path.",
+        "Record: yes or no for ATT writes that line up with vibration. If no, what other traffic appears (L2CAP channel or other)."
+      ],
+      "tags": [
+        "gatt",
+        "transport",
+        "b4",
+        "ledger-q4"
+      ],
+      "related": [
+        "gap-oneplus-transport",
+        "plan-hci-snoop-capture",
+        "c-three-subsystems",
+        "c-pen-attach-handshake",
+        "if-oplus-ipemanager",
+        "c-trust-boundaries",
+        "gap-haptic-command-bytes",
+        "src-bluetooth-analysis-tools",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-j-capture-plan",
+        "src-stylo2-a-reconnaissance",
+        "src-stylo2-c-protocol",
+        "gap-session-handshake"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q4) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-huawei-api",
+      "type": "gap",
+      "title": "Huawei M-Pencil Pro haptic API",
+      "vendor": "Huawei",
+      "category": "SDK",
+      "status": "open",
+      "priority": "low",
+      "url": "",
+      "links": [],
+      "summary": "Huawei's public developer documentation has not shown a direct M-Pencil Pro haptic API.",
+      "details": [
+        "Useful mainly for studying another system-managed feedback design."
+      ],
+      "tags": [
+        "nearlink"
+      ],
+      "related": [
+        "dev-huawei-mpencil-pro",
+        "src-huawei-mpencil"
+      ],
+      "basis": "Research inventory, section 9.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-iot-permission-level",
+      "type": "gap",
+      "title": "What is the protection level of com.oplus.permission.safe.IOT?",
+      "vendor": "OnePlus",
+      "category": "Access",
+      "status": "open",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "The permission that gates the pen service is thought to be privileged or stronger, but nobody has read its protection level.",
+      "details": [
+        "Known: the repository's manifest requests it and the client checks it. The README calls it a restricted system permission that ordinary apps cannot be granted. The root module gets it by installing the app to /system/priv-app with a privapp-permissions allowlist.",
+        "Reported, not read: the level is at least privileged. Public system-app permission listings show the name on several com.oplus.* packages with no level.",
+        "Unknown: whether it is also signature-level, which would make even a privileged install need OnePlus's platform key (B0 and B1).",
+        "Why it matters: it decides whether the binder route is possible at all for an independent app.",
+        "Next step: run dumpsys package com.oplus.permission.safe.IOT and read protectionLevel from the framework permission XML. The service step of pad3_readout.py reads the level two ways; the raw commands are in plan-pad3-readout.",
+        "H also lists a B0 comparison of signers with apksigner verify --print-certs. CLAUDE.md rules out extracting vendor certificates, so ask the owner before that; the level alone answers this question.",
+        "Record: the protectionLevel text, the command or file it came from, and the firmware build. Also put the level in if-oplus-ipemanager."
+      ],
+      "tags": [
+        "permission",
+        "protection-level",
+        "b1",
+        "ledger-q1"
+      ],
+      "related": [
+        "if-oplus-ipemanager",
+        "c-trust-boundaries",
+        "plan-pad3-readout",
+        "plan-trust-boundary-isolation",
+        "gap-service-discovery-and-bind",
+        "plan-route-feasibility",
+        "src-xda-stylo2",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-a-reconnaissance",
+        "src-stylo2-h-trust-boundaries",
+        "src-stylo2-b-feasibility",
+        "plan-route-a-poc-run",
+        "c-vendor-service-pattern",
+        "c-observing-on-device"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q1 and the permissions table) on 2 Nov 2026; not checked on a device. Commands from stylo2/docs/G-local-continuation.md section 3.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-lenovo-lpp",
+      "type": "gap",
+      "title": "Lenovo LPP haptic command interface",
+      "vendor": "Lenovo",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "low",
+      "url": "",
+      "links": [],
+      "summary": "No public Android SDK or community implementation found for AP600U haptics.",
+      "details": [
+        "Treat LPP as a research target, not an established standard.",
+        "Possible lead: LPP code in Lenovo system packages or firmware source releases."
+      ],
+      "tags": [
+        "lpp"
+      ],
+      "related": [
+        "dev-lenovo-ap600u",
+        "src-lenovo-ap600u"
+      ],
+      "basis": "Research inventory, section 9.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-oneplus-feature-semantics",
+      "type": "gap",
+      "title": "Unexplained parts of the OnePlus interface",
+      "vendor": "OnePlus",
+      "category": "Interface",
+      "status": "open",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "Several calls and values are declared but their meaning has not been confirmed.",
+      "details": [
+        "getSupportFeatureList(): no transaction code in the reconstruction.",
+        "startVibration(int): what values it takes, and whether it plays a one-off pulse.",
+        "FUNCTION_VIBRATION (4) and IpeFeature: where each is used.",
+        "getPencilConnectState(): what the integer states mean.",
+        "Demo mode: what enableDemoMode changes.",
+        "The route notes and a code comment in the Rust crate call FUNCTION_VIBRATION (4) a feedback mode rather than a profile. Nothing found confirms it."
+      ],
+      "tags": [
+        "aidl",
+        "semantics"
+      ],
+      "related": [
+        "if-oplus-sdk-interface",
+        "if-oplus-vibration-presets",
+        "if-oplus-ipefeature",
+        "gap-profile-integer-feel",
+        "gap-aidl-matches-firmware",
+        "src-stylo2-c-protocol"
+      ],
+      "basis": "Repository code. Extended on 2 Nov 2026 from stylo2/docs/C-protocol.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-oneplus-sdk-access",
+      "type": "gap",
+      "title": "How does an app join OnePlus's approved pen SDK?",
+      "vendor": "OnePlus",
+      "category": "Access",
+      "status": "open",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "The supported route for third-party apps exists, but its availability, application process and terms are unknown.",
+      "details": [
+        "Known: approved apps such as HiPaint authenticate with OnePlus through a developer SDK.",
+        "Unknown: whether the SDK is public, how to apply, what it checks and what it costs.",
+        "Next step: ask OnePlus developer relations or HiPaint's developer.",
+        "Route notes (Q11): the only non-root binder route, if B1 and B2 are closed, is official developer authorisation. Experiment: an enquiry to OnePlus or OPPO developer relations about authorising this app's package and signing certificate for the accessory service, and on what terms.",
+        "A desk web search on 2 Nov 2026 found no public official Pencil SDK, AAR or integration docs. That search cannot be repeated from this repository, and finding nothing does not show that none exists.",
+        "The route notes say it may need business terms and may not cover the Pad 3 and Stylo 2, and that no endpoint or credentials should be assumed.",
+        "Interoperability rule from the legal notes: use only the app's own signing certificate, never another developer's identity or keys."
+      ],
+      "tags": [
+        "partner",
+        "access"
+      ],
+      "related": [
+        "if-oneplus-partner-sdk",
+        "src-hipaint",
+        "src-revanced-180",
+        "plan-route-feasibility",
+        "src-stylo2-b-feasibility",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-a-reconnaissance"
+      ],
+      "basis": "Repository README and ReVanced issue. Extended on 2 Nov 2026 from stylo2/docs/I-evidence-ledger.md (Q11), B-feasibility.md and LEGAL.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-oneplus-transport",
+      "type": "gap",
+      "title": "What does the service send to the pen, and when?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "It is not known whether a haptic session is one start command with the pen playing on contact, or a stream of commands during writing.",
+      "details": [
+        "The interface shape (set type, start, stop) and the Windows model both suggest the pen plays the texture locally on contact.",
+        "Next step: an HCI snoop log of a writing session in OnePlus Notes would show the pattern.",
+        "The nine capture scenarios, the recording schema and the tables are in plan-hci-snoop-capture. Scenarios 6 and 7 (feedback on, feedback off) show the command pattern.",
+        "A related question about the channel itself: gap-haptic-over-gatt."
+      ],
+      "tags": [
+        "bluetooth",
+        "timing"
+      ],
+      "related": [
+        "c-feedback-models",
+        "c-observing-on-device",
+        "if-windows-haptic-pen-device",
+        "plan-hci-snoop-capture",
+        "gap-haptic-over-gatt",
+        "gap-haptic-command-bytes",
+        "src-stylo2-j-capture-plan"
+      ],
+      "basis": "Open question from the research order. Extended on 2 Nov 2026 from stylo2/docs/J-capture-plan.md.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-pen-firmware-directory",
+      "type": "gap",
+      "title": "Which firmware directory does each tablet need?",
+      "vendor": "OnePlus",
+      "category": "Firmware",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "Partly answered: the directory is named after the tablet's ro.boot.prjname. Still unknown: which number in each pair is Chinese and which global, and what the converted Pad 3 reports.",
+      "details": [
+        "Answered: jjhitel's fix creates /odm/firmware/wireless_pen/<ro.boot.prjname>/, and users report it restores the pen.",
+        "Known numbers: 23926, 23927, 23976, 23978 (Pad Pro / Pad 2); 24926, 24976 (Pad 2 Pro family).",
+        "On the Pad 3: run getprop ro.boot.prjname and ls -lR /odm/firmware/wireless_pen/, hash each cps8601_firmware.bin, and check dmesg | grep cps8601 after attaching the pen. The commands are listed in research/docs/pen-attach-handshake.md.",
+        "Also unknown: how 24976's firmware compares with 24926's, and whether KernelSU mounts a module's top-level odm/ folder.",
+        "To settle how the driver builds the path, read the GPL source of oplus_wireless_pen in OnePlus's kernel release."
+      ],
+      "tags": [
+        "firmware",
+        "pad-3"
+      ],
+      "related": [
+        "if-oplus-wireless-pen-driver",
+        "if-cps8601-firmware",
+        "dev-oneplus-pad3",
+        "src-jjhitel-fix-odm",
+        "plan-pad3-readout"
+      ],
+      "basis": "Open question from the 2 Nov 2026 firmware review.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-pressure-delivered",
+      "type": "gap",
+      "title": "Advertised versus delivered pressure",
+      "vendor": "Cross-vendor",
+      "category": "Measurement",
+      "status": "open",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "Advertised figures such as 16,000 or 16,384 levels may not match what apps receive on a given pen and tablet.",
+      "details": [
+        "Next step: read InputDevice.getMotionRange(AXIS_PRESSURE) and getevent -lp on the Pad 3 with the Stylo 2."
+      ],
+      "tags": [
+        "pressure"
+      ],
+      "related": [
+        "c-observing-on-device",
+        "dev-oneplus-stylo2"
+      ],
+      "basis": "Research inventory, section 9.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-profile-integer-feel",
+      "type": "gap",
+      "title": "Which setVibrationType integers give which feel?",
+      "vendor": "OnePlus",
+      "category": "Interface",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "The profile integers are the enum's declaration order, and which feel each one produces on the pen has not been checked.",
+      "details": [
+        "Known from code: the client sends the enum ordinal (Pencil 0, Eraser 1, Ballpoint 2, Pen 3, FUNCTION_VIBRATION 4), and the Rust mapping reported_code returns the same values. The code comments and route docs warn that declaration order should not be trusted as the wire value.",
+        "The README says the presets come from analysis of the stock Notes app. That is not a check on a device.",
+        "Unknown: whether the service uses these integers as given, what 4 does for setVibrationType, and whether 0 to 4 are all valid.",
+        "The PoC spinner covers 0 to 3. Matrix test 6 says 0 to 3. G section 7 and C section 1.5 say 0 to 4.",
+        "C and a code comment call FUNCTION_VIBRATION (4) a feedback mode rather than a profile. Nothing confirms it (gap-oneplus-feature-semantics).",
+        "Next step: call setVibrationType(n) for n = 0 to 4 on a working binding (authorised), start feedback each time, and record which feel each n produces; or read the bytes from the snoop; then correct stylo2-oplus::wire::reported_code. Only the PoC's own calls are in scope; do not change the profile integers in code without device evidence.",
+        "Record: for each n, the feel in plain words and whether the pen vibrated."
+      ],
+      "tags": [
+        "profiles",
+        "ordinals",
+        "wire-values",
+        "feel"
+      ],
+      "related": [
+        "if-oplus-vibration-presets",
+        "if-oplus-sdk-interface",
+        "gap-oneplus-feature-semantics",
+        "gap-unprivileged-execution",
+        "gap-haptic-command-bytes",
+        "plan-route-a-poc-run",
+        "plan-device-test-matrix",
+        "repo-stylo2-interop-track",
+        "src-stylo2-c-protocol",
+        "src-stylo2-i-evidence-ledger"
+      ],
+      "basis": "Transcribed from stylo2/docs/C-protocol.md (section 1.3 and 1.5), G-local-continuation.md (section 7) and the ledger's profile rows on 2 Nov 2026; code facts checked in the repository. Not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-second-gatt-client-access",
+      "type": "gap",
+      "title": "Can a second app connect to the pen's GATT?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "Whether the pen accepts a GATT connection from an app other than the system, while it stays bonded to the system, is not known.",
+      "details": [
+        "Known: nothing. The pen is bonded to the system. A second app opening its own GATT connection may or may not be allowed (B3).",
+        "Also unknown: whether an ordinary app sees the pen's advertisement or address at all (matrix tests 1 and 2), and whether Companion Device Manager would help.",
+        "Next step: with the inspector, connect while the system is connected and discover services (plan-ble-independent-access-test, steps 1 to 3); export the GATT table.",
+        "Ask the owner first: installing the inspector changes the tablet.",
+        "Record: whether the pen was found by scan, whether connect succeeded, the GATT tree (services, characteristics, properties) with Bluetooth addresses redacted, and the ranking from candidate_control_characteristics."
+      ],
+      "tags": [
+        "gatt",
+        "second-client",
+        "b3",
+        "ledger-q6"
+      ],
+      "related": [
+        "plan-ble-independent-access-test",
+        "plan-device-test-matrix",
+        "gap-second-gatt-client-disruption",
+        "gap-captured-write-buzzes-pen",
+        "c-trust-boundaries",
+        "src-stylo2-a-reconnaissance",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-h-trust-boundaries"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q6) on 2 Nov 2026; not checked on a device. The address and Companion Device Manager points are from stylo2/docs/A-reconnaissance.md section 4.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-second-gatt-client-disruption",
+      "type": "gap",
+      "title": "Does a second GATT connection disrupt the system link or Notes?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "Opening a second connection to the pen may drop the system's link or stop haptics in Notes. Not known.",
+      "details": [
+        "This is a gating test. If a second connection disrupts the system link, direct BLE cannot be used. Matrix tests 11 and 12 are mandatory before any claim of success.",
+        "Next step: with the inspector connected, draw in Notes and watch whether haptics still fire and whether dumpsys bluetooth_manager shows the system link dropping (plan-ble-independent-access-test, step 4).",
+        "If probing disrupts the system link, normal stylus input or Notes, stop and tell the owner before continuing.",
+        "Record: whether haptics in Notes still fire, the link state before and after, and whether normal stylus input still works."
+      ],
+      "tags": [
+        "gatt",
+        "non-interference",
+        "b3",
+        "ledger-q7"
+      ],
+      "related": [
+        "plan-ble-independent-access-test",
+        "plan-device-test-matrix",
+        "gap-second-gatt-client-access",
+        "gap-captured-write-buzzes-pen",
+        "c-trust-boundaries",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-h-trust-boundaries",
+        "src-project-rules"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q7) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-service-discovery-and-bind",
+      "type": "gap",
+      "title": "Can an ordinary app discover and bind the pen service?",
+      "vendor": "OnePlus",
+      "category": "Access",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "No source shows what Android does when an app without the IOT permission looks for, or binds, com.oplus.ipemanager.",
+      "details": [
+        "Known: the repository's own client checks the permission first and stops with PermissionDenied before it calls bindService, so it never shows what the platform does.",
+        "The README says any other app is refused. That is its statement, not a test result.",
+        "Unknown: whether the service is exported and visible to an ordinary app, whether it has a bind-time android:permission, and whether bindService returns true, returns false or throws SecurityException.",
+        "A failure at discovery points to export or visibility (B2). A SecurityException or false at bind points to B1 or a bind-time permission.",
+        "Next step: run steps 1 and 2 of the isolating experiment: queryIntentServices for com.oplus.ipemanager.ACTION.PENCIL_SDK, then bindService and wait for onServiceConnected. The Route A PoC does both and logs exported and the service's bind permission for each match.",
+        "Record: number of matches, exported, bind permission, the bindService result or the exact exception and message, and the descriptor at connect."
+      ],
+      "tags": [
+        "bind-service",
+        "discovery",
+        "b1",
+        "b2",
+        "ledger-q2"
+      ],
+      "related": [
+        "plan-trust-boundary-isolation",
+        "plan-route-a-poc-run",
+        "if-oplus-ipemanager",
+        "if-oplus-call-sequence",
+        "c-trust-boundaries",
+        "gap-iot-permission-level",
+        "gap-caller-validation-after-bind",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-h-trust-boundaries",
+        "plan-route-feasibility"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q2) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-session-handshake",
+      "type": "gap",
+      "title": "Is there a session handshake before the first haptic?",
+      "vendor": "OnePlus",
+      "category": "Protocol",
+      "status": "open",
+      "priority": "high",
+      "url": "",
+      "links": [],
+      "summary": "The pen may need a session setup or per-command authentication before it accepts haptic commands. Not known.",
+      "details": [
+        "Known: nothing. This is the B4 hypothesis.",
+        "If a handshake exists, it is modelled as an Initialising state (the target lifecycle in H) and reproduced before commands. An app-level authentication would make direct BLE unlikely.",
+        "Next step: inspect snoop scenario 9, the initial connection from a powered-off pen with the snoop already running, for any exchange before the first haptic (plan-hci-snoop-capture).",
+        "Record: direction, opcode, handle, payload, and notes on handshake, CCCD subscribe, MTU or PHY. Redact Bluetooth addresses."
+      ],
+      "tags": [
+        "handshake",
+        "session",
+        "b4",
+        "ledger-q8"
+      ],
+      "related": [
+        "plan-hci-snoop-capture",
+        "gap-haptic-over-gatt",
+        "gap-unprivileged-execution",
+        "c-trust-boundaries",
+        "c-pen-attach-handshake",
+        "src-stylo2-i-evidence-ledger",
+        "src-stylo2-j-capture-plan",
+        "src-stylo2-h-trust-boundaries"
+      ],
+      "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q8) on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-unprivileged-execution",
+      "type": "gap",
+      "title": "Does a haptic call from an ordinary app make the pen vibrate?",
+      "vendor": "OnePlus",
+      "category": "Access",
+      "status": "open",
+      "priority": "critical",
+      "url": "",
+      "links": [],
+      "summary": "The headline result of Route A is still unknown: whether set profile plus start feedback from an ordinary app buzzes the pen.",
+      "details": [
+        "Only reachable if the bind and the authorization query succeed.",
+        "If the calls return without error but the pen does not vibrate, the blocker is B4 (protocol or session), not Android.",
+        "Not in the evidence ledger's list of questions. It is step 4 of the isolating experiment in H and the PoC's main physical result.",
+        "If it works, it unlocks gap-profile-integer-feel.",
+        "Next step: run step 4 of the isolating experiment: setVibrationType, then startFeedBackVibration, watch the pen, then stopFeedBackVibration. Do not record works unless the pen physically vibrated.",
+        "Record: yes or no for vibration, the calls made, any exception, and the build."
+      ],
+      "tags": [
+        "route-a",
+        "execution",
+        "b4",
+        "physical-test"
+      ],
+      "related": [
+        "plan-trust-boundary-isolation",
+        "plan-route-a-poc-run",
+        "c-trust-boundaries",
+        "gap-caller-validation-after-bind",
+        "gap-profile-integer-feel",
+        "gap-session-handshake",
+        "src-stylo2-h-trust-boundaries",
+        "src-project-rules"
+      ],
+      "basis": "Transcribed from stylo2/docs/H-trust-boundaries.md (step 4) and android/stylo2-poc/README.md on 2 Nov 2026; not checked on a device.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-usi-haptics",
+      "type": "gap",
+      "title": "Does USI define haptics?",
+      "vendor": "Cross-vendor",
+      "category": "Standard",
+      "status": "open",
+      "priority": "low",
+      "url": "",
+      "links": [],
+      "summary": "Public USI 2.0 coverage mentions no haptics, and the full spec is members-only.",
+      "details": [],
+      "tags": [
+        "usi"
+      ],
+      "related": [
+        "src-usi",
+        "c-pen-sensing"
+      ],
+      "basis": "Search results, 2 Nov 2026.",
+      "updated": "2026-11-02"
+    },
+    {
+      "id": "gap-xiaomi-motor-control",
+      "type": "gap",
+      "title": "Does Pencil Engine control the Focus Pen Pro motor?",
+      "vendor": "Xiaomi",
+      "category": "SDK",
+      "status": "open",
+      "priority": "medium",
+      "url": "",
+      "links": [],
+      "summary": "The published API list covers input and gestures. It does not show a haptic output call.",
+      "details": [
+        "Don't mistake gesture support for haptic output control.",
+        "Next step: inspect the AAR once developer access is granted."
+      ],
+      "tags": [
+        "sdk",
+        "haptics"
+      ],
+      "related": [
+        "if-xiaomi-pen-engine"
+      ],
+      "basis": "Research inventory, section 9.",
+      "updated": "2026-11-02"
+    }
+  ]
+}

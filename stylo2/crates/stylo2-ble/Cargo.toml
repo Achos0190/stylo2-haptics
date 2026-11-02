@@ -1,0 +1,12 @@
+[package]
+name = "stylo2-ble"
+description = "Independent Bluetooth Low Energy transport scaffold for stylo2. Refuses to operate until the Stylo 2 GATT haptic protocol is verified on hardware."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+stylo2-core = { path = "../stylo2-core" }
