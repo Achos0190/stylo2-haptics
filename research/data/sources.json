@@ -259,21 +259,30 @@
       "status": "unverified",
       "priority": "high",
       "url": "https://www.apkmirror.com/apk/oneplus-ltd/smart-accessories-2/",
-      "links": [],
+      "links": [
+        {
+          "label": "Smart Accessories 15.0.30 (APKMirror)",
+          "url": "https://www.apkmirror.com/apk/oneplus-ltd/smart-accessories-2/smart-accessories-2-15-0-30-release/smart-accessories-15-0-30-android-apk-download/"
+        }
+      ],
       "summary": "Third-party mirror listing for OnePlus Smart Accessories, named in the research as the package that hosts the pen service.",
       "details": [
         "Not confirmed to be the same package or version as com.oplus.ipemanager on the Pad 3.",
-        "The copy on your own tablet is the one that matters. Compare its declared services and permissions with adb shell dumpsys package com.oplus.ipemanager."
+        "Version the owner pointed to: Smart accessories 15.0.30. APKMirror's OnePlus uploads index lists it as uploaded 17 December 2024, 42.68 MB. The package name is not shown in that index, and the release page refused automated access (HTTP 403), so the package name was not checked.",
+        "15.0.30 predates the Pad 3's OxygenOS 16 / Android 16 build, so the tablet probably runs a newer version. Compare with the versionName from the service step of research/tools/pad3_readout.py (or adb shell dumpsys package com.oplus.ipemanager).",
+        "The copy on your own tablet is the one that matters. A mirror download's version and provenance may not match it.",
+        "Decompiling this APK, from the mirror or from the tablet, is off unless the owner decides otherwise (CLAUDE.md, gap-aidl-matches-firmware)."
       ],
       "tags": [
         "apk",
         "ipemanager"
       ],
       "related": [
-        "if-oplus-ipemanager",
-        "c-observing-on-device"
+        "c-observing-on-device",
+        "gap-aidl-matches-firmware",
+        "if-oplus-ipemanager"
       ],
-      "basis": "Link from the research inventory.",
+      "basis": "Link from the research inventory. Version 15.0.30, upload date and size read from APKMirror's OnePlus Ltd. uploads index via web search on 2 Nov 2026; the release page itself was not readable (HTTP 403).",
       "updated": "2026-11-02"
     },
     {

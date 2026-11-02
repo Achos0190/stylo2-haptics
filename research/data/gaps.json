@@ -37,7 +37,8 @@
         "src-stylo2-i-evidence-ledger",
         "src-stylo2-c-protocol",
         "src-stylo2-a-reconnaissance",
-        "src-project-rules"
+        "src-project-rules",
+        "src-apkmirror-smart-accessories"
       ],
       "basis": "Transcribed from stylo2/docs/I-evidence-ledger.md (Q10) on 2 Nov 2026; not checked on a device. The block on the experiment is from CLAUDE.md.",
       "updated": "2026-11-02"
